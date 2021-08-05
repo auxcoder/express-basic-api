@@ -1,6 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const expressValidator = require('express-validator');
 const apiRoutes = require('./routes');
 const validateReqBody = require('./routes/middlewares/validateReqBody');
 const catchRoute = require('./routes/middlewares/catchRoute');
@@ -15,11 +13,10 @@ var app = express();
 var port = process.env.PORT || 5000;
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 // parse application/json
-app.use(bodyParser.json());
+app.use(express.json());
 // after the body parser
-app.use(expressValidator());
 
 // validate post/put/patch req.body
 app.use(validateReqBody);
