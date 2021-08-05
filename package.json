@@ -7,6 +7,10 @@
     "start": "nodemon server.js",
     "pm": "pm2 start server.js --watch",
     "test": "NODE_ENV=test mocha --watch ./routes/**/*.test.js",
+    "migrate:latest": "knex migrate:latest",
+    "m:l": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "m:r": "knex migrate:rollback",
     "shell": "echo $0"
   },
   "author": "Auxcoder",
