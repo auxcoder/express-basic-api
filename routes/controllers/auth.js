@@ -43,7 +43,7 @@ router.post('/register', userValidations.newUser, async (req, res) => {
       return res.status(400).json({ errors: messages, data: {} });
     }
     const hash = await hashPassword(req.body.password, constants.saltRounds);
-    const model = await Users.forge(buildUserAttrs(req.body, hash)).save();
+    const model = await new Users(buildUserAttrs(req.body, hash)).save();
     newUserId = model.get('id');
     const welcomeEmail = await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
@@ -68,7 +68,7 @@ router.post('/login', (req, res, next) => {
     req.login(user, {session: false}, err => {
       if (err) res.send(err);
       const token = jwtSign(user, 'auth', constants.ttlAuth);
-      Tokens.forge({id: token, user_id: user.id})
+      new Tokens({id: token, user_id: user.id})
         .save(null, {method: 'insert'})
         .then(model => {
           return res.status(201).json({errors: false, data: model});
@@ -82,8 +82,8 @@ router.post('/login', (req, res, next) => {
 // LOGOUT
 router.get('/logout', validateAuth.hasAuthToken, (req, res) => {
   const token = req.headers.authorization.replace(/bearer\s+/, '');
-  Tokens.forge({ id: token })
-    .destroy({ required: true })
+  new Tokens({id: token})
+    .destroy({required: true})
     .then(() => {
       // Model#destroy() resolves to empty model
       res.json({ errors: false, data: {} });
