@@ -3,8 +3,9 @@ const router = express.Router();
 const passport = require('passport');
 const Users = require('../../db/models/users');
 const Tokens = require('../../db/models/tokens');
-const userValidations = require('../middlewares/validateUser');
-const validateAuth = require('../middlewares/validateAuth');
+const { newUser, existUser } = require('../middlewares/validateUser');
+const { hasAuthToken, verifyEmail } = require('../middlewares/validateAuth');
+const validate = require('../middlewares/validate');
 const jwtSign = require('../../utils/jwtSign');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
@@ -15,7 +16,7 @@ const buildTemplateModel = require('../../utils/buildTemplateModel');
 const emailRepository = require('../../core/email');
 const constants = require('../../config/constants');
 // READ exist
-router.get('/exist/:email', userValidations.existUser, (req, res) => {
+router.get('/exist/:email', existUser(), validate, (req, res) => {
   Users.findByEmail(req.params.email, {
     require: true,
     columns: ['email', 'verified'],
