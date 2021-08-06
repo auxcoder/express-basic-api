@@ -56,26 +56,28 @@ router.post('/register', userValidations.newUser, async (req, res) => {
   }
 });
 // LOGIN
-router.post('/login', (req, res) => {
-  passport.authenticate('local', { session: false }, (err, user) => {
-    if (err) console.log(err);
-    if (!user) {
-      res.status(404).json({ error: ['User not found'], data: {} });
-    }
-    const _ttl = req.body.ttl || constants.ttlAuth;
-    req.login(user, { session: false }, err => {
+router.post('/login', (req, res, next) => {
+  const credentials = req.body;
+  if(!credentials.email) return res.status(422).json({errors: {email: 'is required'}});
+  if(!credentials.password) return res.status(422).json({errors: {password: 'is required'}});
+
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.status(404).json({error: ['User not found', info], data: {}});
+
+    req.login(user, {session: false}, err => {
       if (err) res.send(err);
-      const token = jwtSign(user, 'auth', _ttl);
-      Tokens.forge({ id: token, user_id: user.id })
-        .save(null, { method: 'insert' })
+      const token = jwtSign(user, 'auth', constants.ttlAuth);
+      Tokens.forge({id: token, user_id: user.id})
+        .save(null, {method: 'insert'})
         .then(model => {
-          res.status(201).json({ errors: false, data: model });
+          return res.status(201).json({errors: false, data: model});
         })
         .catch(err => {
-          res.status(500).json({ errors: [err.message], data: {} });
+          return res.status(500).json({errors: [err.message], data: {}});
         });
     });
-  })(req, res);
+  })(req, res, next);
 });
 // LOGOUT
 router.get('/logout', validateAuth.hasAuthToken, (req, res) => {
