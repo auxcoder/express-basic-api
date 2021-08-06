@@ -12,19 +12,19 @@ passport.use(
       passwordField: 'password',
       session: false,
     },
-    async (email, password, done) => {
-      return Users.where('email', email)
+    (email, password, done) => {
+      Users.where('email', email)
         .fetch({
           require: true,
           columns: ['id', 'verified', 'username', 'email', 'role', 'password'],
         })
         .then(model => {
-          if (!model) return done(null, false, { message: 'User not found.' });
+          if (!model) return done(null, false, {message: 'LocalStrategy user not found.'});
           if (!bcrypt.compareSync(password, model.get('password'))) {
-            return done(null, false, { message: 'Wrong password.' });
+            return done(null, false, {message: 'Wrong password.'});
           }
           model.unset('password');
-          return done(null, model.toJSON(), { message: 'Logged In Successfully' });
+          return done(null, model.toJSON(), {message: 'Logged In Successfully'});
         })
         .catch(err => done(err));
     }
@@ -46,7 +46,7 @@ passport.use(
           if (model.get('email') === jwtPayload.email && jwtPayload.sub === 'auth') {
             done(null, model);
           } else {
-            done(null, false, { message: 'Wrong claims' });
+            done(null, false, {message: 'Wrong claims'});
           }
         })
         .catch(err => done(err));

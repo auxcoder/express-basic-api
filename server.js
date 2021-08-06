@@ -16,15 +16,12 @@ var port = process.env.PORT || 5000;
 app.use(express.urlencoded({ extended: true }));
 // parse application/json
 app.use(express.json());
-// after the body parser
-
 // validate post/put/patch req.body
 app.use(validateReqBody);
 // api routes
 app.use('/api', apiRoutes);
 // catch 404 and forward to error handler
 app.use(catchRoute);
-
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -34,7 +31,6 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500).json({ error: true, data: { message: err.message } });
 });
-
 // check if a process is running for mocha with --watch flag
 if (!module.parent) {
   app.listen(port, function() {
