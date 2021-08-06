@@ -8,7 +8,7 @@ exports.up = function(knex, Promise) {
       t.integer('user_id')
         .unsigned()
         .notNullable();
-      t.timestamp('created_at', 6)
+      t.datetime('created_at', 6)
         .notNullable()
         .defaultTo(knex.fn.now());
       t.foreign('user_id')

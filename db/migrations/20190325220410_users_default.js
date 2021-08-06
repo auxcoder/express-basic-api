@@ -15,13 +15,13 @@ exports.up = function(knex, Promise) {
       t.text('veroken'); // use a jwt to verify account
       t.boolean('active').defaultTo(false);
       t.integer('role');
-      t.timestamp('created_at', 6)
+      t.datetime('created_at', 6)
         .notNullable()
         .defaultTo(knex.fn.now());
-      t.timestamp('updated_at', 6)
+      t.datetime('updated_at', 6)
         .notNullable()
         .defaultTo(knex.fn.now());
-      t.timestamp('deleted_at', 6)
+      t.datetime('deleted_at', 6)
         .nullable()
         .defaultTo('0000-00-00 00:00:00');
     })
