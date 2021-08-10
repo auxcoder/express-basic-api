@@ -4,7 +4,8 @@ const emailData = {
   supportEmail: 'support@test.com',
   companyName: 'My Company',
   companyAddress: 'Rue Sant Michelle, 234 France',
-  postmarkId: '3af6bc8a-b974-4452-939c-fed173f1241a',
+  companyUrl: 'https:example.com',
+  postmarkId: '50aa80af-6b92-4e95-97a0-a42bdf0343a5',
 };
 
 const environment = {
