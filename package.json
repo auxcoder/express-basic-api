@@ -31,12 +31,13 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "postmark": "^2.2.4",
-    "sqlite3": "^4.2.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
     "mocha": "^9.0.3",
+    "nodemailer": "^6.6.3",
     "nodemon": "^2.0.3",
+    "sqlite3": "^4.2.0",
     "supertest": "^6.1.4"
   }
 }
