@@ -5,8 +5,7 @@
 Create a Sqlite DB for development
 
 ```sh
-$ sqlite3
-sqlite> create table test.db
+$ sqlite3 test.db
 ```
 
 Install and run
@@ -15,6 +14,28 @@ Install and run
 npm install
 npm start
 ```
+
+## [Knex Migrations](https://knexjs.org/#Migrations)
+
+### Create a new migration
+
+```sh
+knex migrate:make migration_name
+```
+
+### Run latest migration
+
+```sh
+knex migrate:latest
+```
+
+### To rollback the last batch of migrations
+
+```sh
+knex migrate:rollback
+```
+
+
 
 ---
 

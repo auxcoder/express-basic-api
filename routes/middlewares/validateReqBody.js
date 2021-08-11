@@ -1,6 +1,6 @@
-var createError = require('http-errors');
+import createError from "http-errors";
 
-module.exports = function(req, res, next) {
+export default function validateReqBody(req, res, next) {
   function requireBodyAttr(method) {
     return ['PATCH', 'PUT', 'POST'].indexOf(method) !== -1;
   }
