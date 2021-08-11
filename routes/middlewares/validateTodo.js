@@ -1,18 +1,12 @@
-function validateTodo(req, res, next) {
-  const minlength = 5;
-  req.checkBody('title', `Title field min length should be ${minlength}`).isLength({ min: minlength });
-  req.checkBody('completed', 'Completed field should be a boolean').isBoolean();
+import { check } from "express-validator";
 
-  var errors = req.validationErrors();
-  if (errors) {
-    var response = { errors: [] };
-    errors.forEach(function(err) {
-      response.errors.push(err.msg);
-    });
-    res.statusCode = 400;
-    return res.json(response);
-  }
-  return next();
+const validateTodo = () => {
+  return [
+    check('title', `Title field min length should be ${5}`).isLength({ min: 5 }),
+    check('completed', 'Completed field should be a boolean').isBoolean()
+  ]
 }
 
-module.exports = validateTodo;
+export {
+  validateTodo
+};

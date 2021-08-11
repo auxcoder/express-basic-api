@@ -6,10 +6,10 @@ exports.up = function(knex, Promise) {
       t.increments('id').primary();
       t.string('title');
       t.boolean('completed').defaultTo(false);
-      t.timestamp('created_at', 6)
+      t.datetime('created_at', 6)
         .notNullable()
         .defaultTo(knex.fn.now());
-      t.timestamp('updated_at', 6)
+      t.datetime('updated_at', 6)
         .notNullable()
         .defaultTo(knex.fn.now());
     })

@@ -1,7 +1,9 @@
-const express = require('express');
+
+import express from 'express';
+import Todos from '../../db/models/todos.js';
+import {validateTodo}  from '../middlewares/validateTodo.js';
+import validate from '../middlewares/validate.js';
 const router = express.Router();
-const Todos = require('../../db/models/todos');
-const validateTodo = require('../middlewares/validateTodo');
 
 // READ
 router.get('/', (req, res) => {
@@ -10,7 +12,7 @@ router.get('/', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 // CREATE
-router.post('/', validateTodo, (req, res) => {
+router.post('/', validateTodo(), validate, (req, res) => {
   Todos.forge({
     title: req.body.title,
     completed: req.body.completed,
@@ -34,7 +36,7 @@ router.get('/:id([0-9]+)', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 // UPDATE
-router.patch('/:id([0-9]+)', validateTodo, (req, res) => {
+router.patch('/:id([0-9]+)', validateTodo(), validate, (req, res) => {
   if (!req.params.id) console.error('todo ID is required');
   Todos.forge('id', req.params.id)
     .fetch({ require: true })
@@ -58,4 +60,4 @@ router.delete('/:id([0-9]+)', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message] }));
 });
 
-module.exports = router;
+export default router;

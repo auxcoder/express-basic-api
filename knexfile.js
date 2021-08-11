@@ -1,16 +1,14 @@
-'use strict';
-
-module.exports = {
+export default {
   development: {
     client: 'sqlite3',
     connection: {
       filename: 'test.db',
     },
     migrations: {
-      directory: `${__dirname}/db/migrations`,
+      directory: `./db/migrations`,
     },
     seeds: {
-      directory: `${__dirname}/db/seeds`,
+      directory: `./db/seeds`,
     },
     useNullAsDefault: true,
   },
@@ -26,7 +24,7 @@ module.exports = {
       max: 10,
     },
     migrations: {
-      directory: `${__dirname}/db/migrations`,
+      directory: `./db/migrations`,
     },
   },
   production: {
@@ -41,7 +39,7 @@ module.exports = {
       max: 10,
     },
     migrations: {
-      directory: `${__dirname}/db/migrations`,
+      directory: `./db/migrations`,
     },
   },
 };

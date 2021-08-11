@@ -1,6 +1,6 @@
 const app = require('../../server');
 const assert = require('assert');
-const jwtSign = require('../../utils/jwtSign');
+import jwtSign from '../utils/jwtSign.js';
 const request = require('supertest').agent(app.listen());
 var chance = require('chance').Chance();
 const newUser = {

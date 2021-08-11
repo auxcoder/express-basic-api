@@ -1,35 +1,71 @@
-'use strict';
+import winston from 'winston';
 
-var winston = require('winston');
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  debug: 4,
+}
+
+const level = () => {
+  const env = process.env.NODE_ENV || 'development'
+  const isDevelopment = env === 'development'
+  return isDevelopment ? 'debug' : 'warn'
+}
+
+const colors = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  http: 'magenta',
+  debug: 'white',
+}
+
+winston.addColors(colors)
+
+const format = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.colorize({ all: true }),
+  winston.format.prettyPrint(),
+  winston.format.printf(
+    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
+  ),
+)
 
 const baseTransportConfig = {
   maxFiles: 5,
   colorize: false,
   handleExceptions: true,
-  format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
-};
+}
 
-var logger = winston.createLogger({
+const transports = [
+  new winston.transports.Console(),
+  new winston.transports.File(
+    Object.assign({}, baseTransportConfig, {
+      json: true,
+      maxsize: 5242880, //5MB,
+      level: 'error',
+      filename: './logs/error-logs.log',
+    })
+  ),
+  new winston.transports.File(
+    Object.assign({}, baseTransportConfig, {
+      json: false,
+      maxsize: 5242880, //5MB
+      level: 'debug',
+      filename: './logs/all-logs.log',
+    })
+  ),
+]
+
+const Logger = winston.createLogger({
   exitOnError: false,
-  transports: [
-    new winston.transports.File(
-      Object.assign({}, baseTransportConfig, {
-        json: true,
-        maxsize: 5242880, //5MB,
-        level: 'error',
-        filename: './logs/error-logs.log',
-      })
-    ),
-    new winston.transports.File(
-      Object.assign({}, baseTransportConfig, {
-        json: false,
-        maxsize: 5242880, //5MB
-        level: 'debug',
-        filename: './logs/all-logs.log',
-      })
-    ),
-  ],
-});
+  level: level(),
+  levels,
+  format,
+  transports,
+})
 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(
@@ -50,4 +86,4 @@ console.warn = (...args) => logger.warn.call(logger, ...args);
 console.error = (...args) => logger.error.call(logger, ...args);
 console.debug = (...args) => logger.debug.call(logger, ...args);
 
-module.exports = logger;
+export default Logger;

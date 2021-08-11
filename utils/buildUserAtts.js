@@ -1,6 +1,6 @@
-const jwtSign = require('../utils/jwtSign');
-const constants = require('../config/constants');
-//
+import jwtSign from '../utils/jwtSign.js';
+import constants from '../config/constants.js';
+
 const buildUserAttrs = (user, data) => {
   const emailVerified = false;
   const role = 1; // guess by default
@@ -21,5 +21,5 @@ const buildUserAttrs = (user, data) => {
     }
   );
 };
-// module
-module.exports = buildUserAttrs;
+
+export default buildUserAttrs;

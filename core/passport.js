@@ -1,9 +1,10 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const JWTStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-const bcrypt = require('bcryptjs');
-const Users = require('../db/models/users');
+import passport from 'passport';
+import localPkg from 'passport-local';
+import jwtPkg from 'passport-jwt';
+import bcrypt from 'bcryptjs';
+import Users from '../db/models/users.js';
+const {Strategy: LocalStrategy} = localPkg;
+const {Strategy: JWTStrategy, ExtractJwt} = jwtPkg;
 
 passport.use(
   new LocalStrategy(
@@ -12,19 +13,19 @@ passport.use(
       passwordField: 'password',
       session: false,
     },
-    async (email, password, done) => {
-      return Users.where('email', email)
+    (email, password, done) => {
+      Users.where('email', email)
         .fetch({
           require: true,
           columns: ['id', 'verified', 'username', 'email', 'role', 'password'],
         })
         .then(model => {
-          if (!model) return done(null, false, { message: 'User not found.' });
+          if (!model) return done(null, false, {message: 'LocalStrategy user not found.'});
           if (!bcrypt.compareSync(password, model.get('password'))) {
-            return done(null, false, { message: 'Wrong password.' });
+            return done(null, false, {message: 'Wrong password.'});
           }
           model.unset('password');
-          return done(null, model.toJSON(), { message: 'Logged In Successfully' });
+          return done(null, model.toJSON(), {message: 'Logged In Successfully'});
         })
         .catch(err => done(err));
     }
@@ -38,18 +39,20 @@ passport.use(
       secretOrKey: 'secret',
     },
     function(jwtPayload, done) {
-      return Users.findByEmail(jwtPayload.email, {
+      return Users.where('email', decoded.email).fetch({
         require: true,
         columns: ['verified', 'username', 'email', 'role'],
       })
-        .then(model => {
-          if (model.get('email') === jwtPayload.email && jwtPayload.sub === 'auth') {
-            done(null, model);
-          } else {
-            done(null, false, { message: 'Wrong claims' });
-          }
-        })
-        .catch(err => done(err));
+      .then(model => {
+        if (model.get('email') === jwtPayload.email && jwtPayload.sub === 'auth') {
+          done(null, model);
+        } else {
+          done(null, false, {message: 'Wrong claims'});
+        }
+      })
+      .catch(err => done(err));
     }
   )
 );
+
+export default passport;
