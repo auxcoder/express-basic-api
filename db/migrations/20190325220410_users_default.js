@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
-const jwtSign = require('../../utils/jwtSign');
-const constants = require('../../config/constants');
+import jwtSign from '../../utils/jwtSign.js';
+import constants from '../../config/constants';
 // modules
 exports.up = function(knex, Promise) {
   return knex.schema

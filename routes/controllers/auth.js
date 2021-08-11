@@ -1,23 +1,23 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('passport');
-const Users = require('../../db/models/users');
-const Tokens = require('../../db/models/tokens');
-const { newUser, existUser } = require('../middlewares/validateUser');
-const { hasAuthToken, verifyEmail } = require('../middlewares/validateAuth');
-const validate = require('../middlewares/validate');
-const jwtSign = require('../../utils/jwtSign');
-const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
+import express from 'express';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import Users from '../../db/models/users.js';
+import Tokens from '../../db/models/tokens.js';
+import { newUser, existUser } from '../middlewares/validateUser.js';
+import { hasAuthToken, verifyEmail } from '../middlewares/validateAuth.js';
+import validate from '../middlewares/validate.js';
+import jwtSign from '../../utils/jwtSign.js';
+import { promisify } from 'util';
+import buildUserAttrs from '../../utils/buildUserAtts.js';
+import hashPassword from '../../utils/hashPass.js';
+import buildTemplateModel from '../../utils/buildTemplateModel.js';
+import emailRepository from '../../core/email.js';
+import constants from '../../config/constants.js';
 const verifyAsync = promisify(jwt.verify);
-const buildUserAttrs = require('../../utils/buildUserAtts');
-const hashPassword = require('../../utils/hashPass');
-const buildTemplateModel = require('../../utils/buildTemplateModel');
-const emailRepository = require('../../core/email');
-const constants = require('../../config/constants');
+const router = express.Router();
 // READ exist
 router.get('/exist/:email', existUser(), validate, (req, res) => {
-  Users.findByEmail(req.params.email, {
+  Users.where('email', req.params.email).fetch({
     require: true,
     columns: ['email', 'verified'],
   })
@@ -29,31 +29,31 @@ router.get('/exist/:email', existUser(), validate, (req, res) => {
     });
 });
 // REGISTER
-router.post('/register', userValidations.newUser, async (req, res) => {
+router.post('/register', newUser(), validate, async (req, res) => {
   try {
     let newUserId;
-    const user = await Users.findByEmail(req.body.email, {
-      // required: true,
+    let user;
+    await Users.where('email', req.body.email).fetch({
       columns: ['id', 'email', 'verified'],
-    });
-
+    })
     if (user) {
       const messages = [`Email in use: ${user.get('email')}`];
       if (!user.get('verified')) messages.push(`Email not veryfied: ${user.get('verified')}`);
       // response with errors, user exist &|| not verified
-      return res.status(400).json({ errors: messages, data: {} });
+      return res.status(400).json({errors: messages, data: {}});
     }
     const hash = await hashPassword(req.body.password, constants.saltRounds);
     const model = await new Users(buildUserAttrs(req.body, hash)).save();
     newUserId = model.get('id');
-    const welcomeEmail = await emailRepository.sendWelcome(
+    await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
       model.get('email'),
       buildTemplateModel(model.toJSON(), req.body.client)
     );
-    res.status(201).json({ errors: false, data: { id: newUserId } });
+    res.status(201).json({ errors: false, data: {id: newUserId}});
   } catch (error) {
-    res.json({ errors: [error.message], data: {} });
+    console.log('catch > error > ', error); // eslint-disable-line
+    res.json({errors: [error.message], data: {}});
   }
 });
 // LOGIN
@@ -81,39 +81,39 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 // LOGOUT
-router.get('/logout', validateAuth.hasAuthToken, (req, res) => {
+router.get('/logout', hasAuthToken(), validate, (req, res) => {
   const token = req.headers.authorization.replace(/bearer\s+/, '');
   new Tokens({id: token})
     .destroy({required: true})
     .then(() => {
       // Model#destroy() resolves to empty model
-      res.json({ errors: false, data: {} });
+      res.json({errors: false, data: {}});
     })
     .catch(err => {
       if (err.message === 'No Rows Deleted') {
-        res.status(404).json({ errors: [err.message], data: {} });
+        res.status(404).json({errors: [err.message], data: {}});
       } else {
-        res.json({ errors: [err], data: {} });
+        res.json({errors: [err], data: {}});
       }
     });
 });
 // VERIFY
-router.post('/verify', validateAuth.verifyEmail, (req, res) => {
+router.post('/verify', verifyEmail(), validate, (req, res) => {
   const verifyToken = req.body.token;
   verifyAsync(verifyToken, 'secret')
     .then(decoded => {
-      return Users.findByEmail(decoded.email, { required: true });
+      return Users.where('email', decoded.email).fetch({required: true})
     })
     .then(model => {
-      model.set({ verified: true });
+      model.set({verified: true});
       return model.save();
     })
     .then(model => {
-      res.json({ errors: false, data: model });
+      res.json({errors: false, data: model});
     })
     .catch(err => {
-      res.json({ errors: [err.message], data: {} });
+      res.json({errors: [err.message], data: {}});
     });
 });
 // module
-module.exports = router;
+export default router;

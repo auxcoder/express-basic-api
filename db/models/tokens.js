@@ -1,10 +1,11 @@
-const Bookshelf = require('../bookshelf');
-require('./users');
-const Tokens = {
-  tableName: 'tokens',
+import Bookshelf from '../bookshelf.js';
+import Users from './users.js';
+
+class Tokens extends Bookshelf.Model {
+  get tableName() { return 'tokens'; }
   user() {
     return this.belongsTo('Users');
-  },
-};
+  }
+}
 // module
-module.exports = Bookshelf.model('Tokens', Tokens);
+export default Bookshelf.model('Tokens', Tokens);

@@ -1,4 +1,5 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+
 function jwtSign(user, sub, ttl) {
   return jwt.sign(
     {
@@ -12,4 +13,4 @@ function jwtSign(user, sub, ttl) {
   );
 }
 // module
-module.exports = jwtSign;
+export default jwtSign;

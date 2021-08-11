@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A basic rest API, Knex, Bookshelf",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon server.js",
     "pm": "pm2 start server.js --watch",

@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
+import  constants from '../../config/constants.js';
+import Users from '../../db/models/users.js';
+import { newUser, patchUser } from '../middlewares/validateUser.js';
+import jwtSign from '../../utils/jwtSign.js';
+import hashPassword from '../../utils/hashPass.js';
 const router = express.Router();
-const constants = require('../../config/constants');
-const Users = require('../../db/models/users');
-const userValidations = require('../middlewares/validateUser');
-const jwtSign = require('../../utils/jwtSign');
-const hashPassword = require('../../utils/hashPass');
 // READ all
 router.get('/', (req, res) => {
   Users.fetchAll()
@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 // CREATE
-router.post('/', userValidations.newUser, (req, res) => {
+router.post('/', newUser, (req, res) => {
   hashPassword(req.body.password, constants.saltRounds)
     .then(data => {
       const dataMerged = Object.assign(
@@ -61,7 +61,7 @@ router.get('/:id([0-9]+)', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 // UPDATE
-router.patch('/:id([0-9]+)', userValidations.patchUser, (req, res) => {
+router.patch('/:id([0-9]+)', patchUser, (req, res) => {
   if (!req.params.id) console.error('user ID is required');
   Users.where('id', req.params.id)
     .fetch({ require: true })
@@ -95,4 +95,4 @@ router.delete('/:id([0-9]+)', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 
-module.exports = router;
+export default router;

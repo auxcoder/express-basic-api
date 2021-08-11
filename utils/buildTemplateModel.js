@@ -1,6 +1,6 @@
-const constants = require('../config/constants');
-//
-function buildTemplateModel(user, client) {
+import constants from '../config/constants.js';
+
+export default function buildTemplateModel(user, client) {
   return {
     product_name: 'Evenement',
     name: user.username,
@@ -15,5 +15,3 @@ function buildTemplateModel(user, client) {
     company_address: constants.companyAddress,
   };
 }
-// module
-module.exports = buildTemplateModel;

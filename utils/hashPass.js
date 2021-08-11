@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
 function bcryptSaltAndHash(pass, itr) {
   return new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ function bcryptSaltAndHash(pass, itr) {
   });
 }
 
-module.exports = async function hashPassword(password, itr = 2) {
+export default async function hashPassword(password, itr = 2) {
   const hashData = await bcryptSaltAndHash(password, itr);
   return hashData;
 };

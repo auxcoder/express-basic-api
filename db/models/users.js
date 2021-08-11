@@ -1,13 +1,16 @@
-let Bookshelf = require('../bookshelf');
-require('./tokens');
+import Bookshelf from '../bookshelf.js';
+import Tokens from './tokens.js';
 
-var Users = {
-  tableName: 'users',
-  hidden: ['salt'],
-  softDelete: true,
+class Users extends Bookshelf.Model {
+  constructor() {
+    super();
+    this.tableName = 'users';
+    this.idAttribute = 'id';
+    this.gethidden = ['salt'];
+}
   tokens() {
     return this.hasMany('Tokens');
-  },
+  }
 }
 
 /**
@@ -16,10 +19,10 @@ var Users = {
  * @param {Object} [options] Options used of model.fetch
  * @return {Promise(bookshelf.Model)}
  */
-const findByEmail = {findByEmail: function(email, options) {
-  options = Object.assign({}, options);
-  return this.where('email', email).fetch(options);
-}};
+// const findByEmail = {findByEmail: function(email, options) {
+//   options = Object.assign({}, options);
+//   return this.where('email', email).fetch(options);
+// }};
 
 // module
-module.exports = Bookshelf.model('Users', Users, findByEmail);
+export default Users;

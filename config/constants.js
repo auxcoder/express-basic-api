@@ -45,4 +45,4 @@ const constants = {
   ),
 };
 
-module.exports = constants[env];
+export default constants[env];

@@ -1,7 +1,7 @@
 // #region
 const app = require('../../server');
 const assert = require('assert');
-const jwtSign = require('../../utils/jwtSign');
+import jwtSign from '../utils/jwtSign.js';
 // .agent(app.listen()) is used when the --watch flag is used with Mocha.
 // but only when I ran that watching command as a npm script from package.json.
 const request = require('supertest').agent(app.listen());

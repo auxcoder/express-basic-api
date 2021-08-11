@@ -1,12 +1,14 @@
-const express = require('express');
-const apiRoutes = require('./routes');
-const validateReqBody = require('./routes/middlewares/validateReqBody');
-const catchRoute = require('./routes/middlewares/catchRoute');
-require('./core/logger');
-require('./core/passport');
+import express from 'express';
+import apiRoutes from './routes/index.js';
+import miscRoutes from './routes/misc.js';
+import validateReqBody from './routes/middlewares/validateReqBody.js';
+import catchRoute from './routes/middlewares/catchRoute.js';
+import passport from './core/passport.js';
+import dotenv from 'dotenv';
+// import logger from './core/logger.js';
 
 if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+  dotenv.config();
 }
 
 var app = express();
@@ -18,7 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // validate post/put/patch req.body
 app.use(validateReqBody);
+// passport
+app.use(passport.initialize());
 // api routes
+app.use('/', miscRoutes);
 app.use('/api', apiRoutes);
 // catch 404 and forward to error handler
 app.use(catchRoute);
@@ -31,11 +36,9 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500).json({ error: true, data: { message: err.message } });
 });
-// check if a process is running for mocha with --watch flag
-if (!module.parent) {
-  app.listen(port, function() {
-    console.log(`Express listening on port: ${port}`);
-  });
-}
+// todo: check if a process is running for mocha with --watch flag
+app.listen(port, function() {
+  console.log(`Express listening on port: ${port}`);
+});
 
-module.exports = app;
+export default app;

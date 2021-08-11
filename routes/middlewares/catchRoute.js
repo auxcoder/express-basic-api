@@ -1,5 +1,5 @@
-var createError = require('http-errors');
+import createError from "http-errors";
 
-module.exports = function(req, res, next) {
+export default function(req, res, next) {
   next(createError(404, 'route not found'));
 };
