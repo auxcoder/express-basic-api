@@ -96,6 +96,8 @@ TODO:
 
 - [Building A Node Js Rest Api With Express - Part 1](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-46b0901f29b6)
 - [Building A Node Js Rest Api With Express - Part 2](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-part-two-9152661bf47)
+- [Express API ES6 Starter](https://codesandbox.io/s/lsn9y)
+- [Bookshelf.js tutorial](https://zetcode.com/javascript/bookshelf/)
 
 #### Docs
 
@@ -224,7 +226,7 @@ app.post('/:id', function(req, res) {
 ```
 
 ```js
-Todos.forge('id', req.params.id)
+new Todos('id', req.params.id)
   .fetch({ require: true })
   .then(todo => {
     todo.destroy().then(() => res.json({ error: false, data: { message: 'Quote deleted' } }));
