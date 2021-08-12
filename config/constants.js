@@ -1,11 +1,13 @@
+import dotenv from 'dotenv';
 let env = process.env.NODE_ENV || 'development';
+if (process.env.NODE_ENV !== 'production') dotenv.config();
 
 const emailData = {
   supportEmail: 'support@test.com',
   companyName: 'My Company',
   companyAddress: 'Rue Sant Michelle, 234 France',
   companyUrl: 'https:example.com',
-  postmarkId: '50aa80af-6b92-4e95-97a0-a42bdf0343a5',
+  postmarkId: process.env.POSTMARK_ID,
 };
 
 const environment = {
