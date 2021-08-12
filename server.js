@@ -5,11 +5,8 @@ import validateReqBody from './routes/middlewares/validateReqBody.js';
 import catchRoute from './routes/middlewares/catchRoute.js';
 import passport from './core/passport.js';
 import dotenv from 'dotenv';
+if (process.env.NODE_ENV !== 'production') dotenv.config();
 // import logger from './core/logger.js';
-
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config();
-}
 
 var app = express();
 var port = process.env.PORT || 5000;
