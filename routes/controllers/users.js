@@ -90,7 +90,7 @@ router.delete('/:id([0-9]+)', (req, res) => {
   let options = { require: true };
   // hard remove test record if env is dev
   if (process.env.NODE_ENV === 'test') options.hardDelete = true;
-  Users.forge('id', req.params.id)
+  new Users('id', req.params.id)
     .destroy(options)
     .then(() => res.json({ errors: false, message: 'User removed' }))
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));

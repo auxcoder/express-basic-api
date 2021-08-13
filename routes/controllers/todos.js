@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
 });
 // CREATE
 router.post('/', validateTodo(), validate, (req, res) => {
-  Todos.forge({
+  new Todos({
     title: req.body.title,
     completed: req.body.completed,
   })
@@ -38,7 +38,7 @@ router.get('/:id([0-9]+)', (req, res) => {
 // UPDATE
 router.patch('/:id([0-9]+)', validateTodo(), validate, (req, res) => {
   if (!req.params.id) console.error('todo ID is required');
-  Todos.forge('id', req.params.id)
+  new Todos('id', req.params.id)
     .fetch({ require: true })
     .then(todo => {
       todo
