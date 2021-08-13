@@ -39,7 +39,7 @@ passport.use(
       secretOrKey: 'secret',
     },
     function(jwtPayload, done) {
-      return Users.where('email', decoded.email).fetch({
+      return Users.where('email', jwtPayload.email).fetch({
         require: true,
         columns: ['verified', 'username', 'email', 'role'],
       })

@@ -1,9 +1,10 @@
 import express from 'express';
-import  constants from '../../config/constants.js';
+import constants from '../../config/constants.js';
 import Users from '../../db/models/users.js';
 import { newUser, patchUser } from '../middlewares/validateUser.js';
 import jwtSign from '../../utils/jwtSign.js';
 import hashPassword from '../../utils/hashPass.js';
+import validate from '../middlewares/validate.js';
 const router = express.Router();
 // READ all
 router.get('/', (req, res) => {
@@ -12,7 +13,7 @@ router.get('/', (req, res) => {
     .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
 });
 // CREATE
-router.post('/', newUser, (req, res) => {
+router.post('/', newUser(), validate, (req, res) => {
   hashPassword(req.body.password, constants.saltRounds)
     .then(data => {
       const dataMerged = Object.assign(
@@ -34,7 +35,7 @@ router.post('/', newUser, (req, res) => {
           ),
         }
       );
-      Users.forge(dataMerged)
+      new Users(dataMerged)
         .save()
         .then(data => res.status(201).json({ errors: false, data: { id: data.id } }))
         .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
