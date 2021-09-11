@@ -31,29 +31,41 @@ router.get('/exist/:email', existUser(), validate, (req, res) => {
 // REGISTER
 router.post('/register', newUser(), validate, async (req, res) => {
   try {
-    let newUserId;
-    let user;
-    await Users.where('email', req.body.email).fetch({
-      columns: ['id', 'email', 'verified'],
-    })
+    const user = await Users.query({
+      where: { email: req.body.email }
+    }).fetch({require: true});
+
     if (user) {
       const messages = [`Email in use: ${user.get('email')}`];
       if (!user.get('verified')) messages.push(`Email not veryfied: ${user.get('verified')}`);
       // response with errors, user exist &|| not verified
       return res.status(400).json({errors: messages, data: {}});
     }
-    const hash = await hashPassword(req.body.password, constants.saltRounds);
-    const model = await new Users(buildUserAttrs(req.body, hash)).save();
-    newUserId = model.get('id');
-    await emailRepository.sendWelcome(
-      'noreplay@auxcoder.com',
-      model.get('email'),
-      buildTemplateModel(model.toJSON(), req.body.client)
-    );
-    res.status(201).json({ errors: false, data: {id: newUserId}});
   } catch (error) {
-    console.log('catch > error > ', error); // eslint-disable-line
-    res.json({errors: [error.message], data: {}});
+    switch (error.message) {
+      case ('EmptyResponse'):
+        await createUser();
+        break;
+      default:
+        res.json({errors: [error.message], data: {}});
+    }
+  }
+
+  async function createUser() {
+    try {
+      const hash = await hashPassword(req.body.password, constants.saltRounds);
+      const userObj = buildUserAttrs(req.body, hash)
+      const model = await new Users(userObj).save();
+      await emailRepository.sendWelcome(
+        'noreplay@auxcoder.com',
+        model.get('email'),
+        buildTemplateModel(model.toJSON(), req.body.client)
+      );
+      res.status(201).json({ errors: false, data: {id: model.get('id')}});
+    } catch (error) {
+      console.log('error >> ', error.message); // eslint-disable-line
+      res.json({errors: [error.message], data: {}});
+    }
   }
 });
 // LOGIN

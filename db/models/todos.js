@@ -1,17 +1,14 @@
 import Bookshelf from '../bookshelf.js';
-import Users from './users.js';
+import User from './users.js';
 
-class Todos extends Bookshelf.Model {
-  get tableName() { return 'todos' }
+export default class Todos extends Bookshelf.Model {
+  constructor(...args) {
+    super(...args);
+    this.tableName = 'todos';
+    this.idAttribute = 'id';
+  }
+
   user() {
-    return this.belongsTo('Users');
+    return this.belongsTo(User, 'id');
   }
 }
-// const Todos = {
-//   tableName: 'todos',
-//   user() {
-//     return this.belongsTo('Users');
-//   },
-// };
-// module
-export default Bookshelf.model('Todos', Todos);

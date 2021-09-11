@@ -1,7 +1,7 @@
-import jwtSign from '../utils/jwtSign.js';
-import constants from '../config/constants.js';
+import jwtSign from '../../utils/jwtSign.js';
+import constants from '../../config/constants.js';
 
-exports.up = function(knex, Promise) {
+export const up = function(knex, Promise) {
   return knex.schema
     .createTable('tokens', function(t) {
       t.text('id').primary();
@@ -29,7 +29,7 @@ exports.up = function(knex, Promise) {
     });
 };
 
-exports.down = function(knex, Promise) {
+export const down = function(knex, Promise) {
   return knex.schema.dropTable('tokens');
 };
 

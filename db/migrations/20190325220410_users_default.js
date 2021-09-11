@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 import jwtSign from '../../utils/jwtSign.js';
-import constants from '../../config/constants';
+import constants from '../../config/constants.js';
 // modules
-exports.up = function(knex, Promise) {
+export const up = function(knex, Promise) {
   return knex.schema
     .createTable('users', function(t) {
       t.increments('id').primary();
@@ -36,7 +36,7 @@ exports.up = function(knex, Promise) {
     });
 };
 
-exports.down = function(knex, Promise) {
+export const down = function(knex, Promise) {
   return knex.schema.dropTable('users');
 };
 
