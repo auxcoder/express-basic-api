@@ -28,3 +28,9 @@ export const patchTodo = () => {
     check('user_id', `The user ID is invalid`).exists().custom(value => Number.isInteger(value))
   ]
 }
+
+export const deleteTodo = () => {
+  return [
+    check('id', `Todo ID is invalid`).exists().custom(value => Number.isInteger(Number(value)))
+  ]
+}

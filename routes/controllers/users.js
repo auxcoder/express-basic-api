@@ -57,7 +57,7 @@ router.get('/:id([0-9]+)', async (req, res) => {
       res.json({errors: false, data: data});
     }
   } catch (err) {
-    res.status(500).json({errors: [err.message], data: {}})
+    res.status(500).json({errors: [err.message], data: {}});
   }
 })
 // UPDATE
@@ -67,14 +67,14 @@ router.patch('/:id([0-9]+)', patchUser(), validate, async (req, res) => {
   try {
     const data = await User.query({where: {id: req.params.id}}).fetch({require: true});
     if (data) {
-      const toUpdate = Object.assign(req.body, {updated_at: new Date().toISOString()})
+      const toUpdate = Object.assign(req.body, {updated_at: new Date().toISOString()});
       await new User({id: data.id}).save(toUpdate, {patch: true});
       return res.json({errors: false, data: toUpdate});
     } else {
-      return res.status(404).json({ errors: 'User not found', data: {} });
+      return res.status(404).json({errors: 'User not found', data: {}});
     }
   } catch (err) {
-    return res.status(500).json({ errors: [err.message], data: {} });
+    return res.status(500).json({errors: [err.message], data: {}});
   }
 });
 // DELETE
@@ -87,7 +87,7 @@ router.delete('/:id([0-9]+)', async (req, res) => {
     await new User('id', req.params.id).destroy();
     return res.json({errors: false, message: 'User removed'});
   } catch (err) {
-    res.status(500).json({ errors: [err.message], data: {} })
+    res.status(500).json({errors: [err.message], data: {}});
   }
 });
 
