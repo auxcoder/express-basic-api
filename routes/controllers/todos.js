@@ -31,16 +31,16 @@ router.post('/', createTodo(), validate, async (req, res) => {
 // READ
 router.get('/:id([0-9]+)', getTodo(), validate, async (req, res) => {
   if (!req.params.id) console.error('quote ID is required');
-  Todos.where('id', req.params.id)
-    .fetch()
-    .then(data => {
-      if (!data) {
-        res.status(404).json({ errors: true, data: {} });
-      } else {
-        res.json({ errors: false, data: data });
-      }
-    })
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+  try {
+    const data = await Todo.where('id', req.params.id).fetch()
+    if (!data) {
+      return res.status(404).json({errors: true, data: {}});
+    } else {
+      return res.json({errors: false, data: data});
+    }
+  } catch (error) {
+    return res.status(500).json({errors: [err.message], data: {}})
+  }
 });
 // UPDATE
 router.patch('/:id([0-9]+)', validateTodo(), validate, (req, res) => {
