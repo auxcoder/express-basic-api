@@ -1,28 +1,20 @@
 import Bookshelf from '../bookshelf.js';
-import Tokens from './tokens.js';
+import Token from './tokens.js';
+import Todo from './todos.js';
 
-class Users extends Bookshelf.Model {
-  constructor() {
-    super();
+export default class User extends Bookshelf.Model {
+  constructor(...args) {
+    super(...args);
     this.tableName = 'users';
     this.idAttribute = 'id';
-    this.gethidden = ['salt'];
-}
+    this.hidden = ['salt'];
+  }
+
   tokens() {
-    return this.hasMany('Tokens');
+    return this.hasMany(Token, 'user_id');
+  }
+
+  todos() {
+    return this.hasMany(Todo, 'user_id');
   }
 }
-
-/**
- * Find a model based on it's ID
- * @param {String} email The model's email
- * @param {Object} [options] Options used of model.fetch
- * @return {Promise(bookshelf.Model)}
- */
-// const findByEmail = {findByEmail: function(email, options) {
-//   options = Object.assign({}, options);
-//   return this.where('email', email).fetch(options);
-// }};
-
-// module
-export default Users;

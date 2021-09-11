@@ -1,10 +1,12 @@
-var chance = require('chance').Chance();
+import chance from 'chance';
+var Chance = chance();
 
-exports.up = function(knex, Promise) {
+export const up = function(knex, Promise) {
   return knex.schema
     .createTable('todos', function(t) {
       t.increments('id').primary();
       t.string('title');
+      t.integer('user_id').defaultTo(1);
       t.boolean('completed').defaultTo(false);
       t.datetime('created_at', 6)
         .notNullable()
@@ -21,7 +23,7 @@ exports.up = function(knex, Promise) {
     });
 };
 
-exports.down = function(knex, Promise) {
+export const down = function(knex, Promise) {
   return knex.schema.dropTable('todos');
 };
 
@@ -34,8 +36,8 @@ function genTodos() {
   var date = new Date();
   return [1, 2, 3, 4, 5].map(() => {
     return {
-      title: chance.sentence({ words: 5 }),
-      completed: chance.bool({ likelihood: 30 }),
+      title: Chance.sentence({ words: 5 }),
+      completed: Chance.bool({ likelihood: 30 }),
       created_at: date.toISOString(),
       updated_at: date.addDays(5).toISOString(),
     };
