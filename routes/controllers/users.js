@@ -1,16 +1,21 @@
 import express from 'express';
 import constants from '../../config/constants.js';
-import Users from '../../db/models/users.js';
-import { newUser, patchUser } from '../middlewares/validateUser.js';
+import User from '../../db/models/users.js';
+import {newUser, patchUser} from '../middlewares/validateUser.js';
 import jwtSign from '../../utils/jwtSign.js';
 import hashPassword from '../../utils/hashPass.js';
 import validate from '../middlewares/validate.js';
 const router = express.Router();
 // READ all
-router.get('/', (req, res) => {
-  Users.fetchAll()
-    .then(data => res.json({ errors: false, data: data }))
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+router.get('/', async (req, res) => {
+  try {
+    // knex query builder
+    // {withRelated: ['tokens']}
+    const data = await User.query().select().where({verified: true});
+    return res.json({errors: false, data: data});
+  } catch (err) {
+    return res.status(500).json({ errors: [err.message], data: {} })
+  }
 });
 // CREATE
 router.post('/', newUser(), validate, (req, res) => {

@@ -1,18 +1,15 @@
 import Bookshelf from '../bookshelf.js';
-import Tokens from './tokens.js';
+import Token from './tokens.js';
 
-class Users extends Bookshelf.Model {
+export default class User extends Bookshelf.Model {
   constructor(...args) {
     super(...args);
     this.tableName = 'users';
     this.idAttribute = 'id';
-    this.gethidden = ['salt'];
+    this.hidden = ['salt'];
   }
 
   tokens() {
-    return this.hasMany('Tokens');
+    return this.hasMany(Token, 'user_id');
   }
 }
-
-// module
-export default Users;
