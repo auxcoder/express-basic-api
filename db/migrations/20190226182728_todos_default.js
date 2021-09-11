@@ -6,6 +6,7 @@ export const up = function(knex, Promise) {
     .createTable('todos', function(t) {
       t.increments('id').primary();
       t.string('title');
+      t.integer('user_id').defaultTo(1);
       t.boolean('completed').defaultTo(false);
       t.datetime('created_at', 6)
         .notNullable()
