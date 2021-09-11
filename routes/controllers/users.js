@@ -64,27 +64,21 @@ router.get('/:id([0-9]+)', async (req, res) => {
   }
 })
 // UPDATE
-router.patch('/:id([0-9]+)', patchUser, (req, res) => {
+router.patch('/:id([0-9]+)', patchUser(), validate, async (req, res) => {
   if (!req.params.id) console.error('user ID is required');
-  Users.where('id', req.params.id)
-    .fetch({ require: true })
-    .then(user => {
-      user
-        .save({
-          username: req.body.username,
-          email: req.body.email,
-          // -----------------------------------------------
-          updated_at: new Date().toISOString(),
-        })
-        .then(data => {
-          return res.json({
-            errors: false,
-            data: data,
-            message: 'User updated',
-          });
-        });
-    })
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+
+  try {
+    const data = await User.query({where: {id: req.params.id}}).fetch({require: true});
+    if (data) {
+      const toUpdate = Object.assign(req.body, {updated_at: new Date().toISOString()})
+      await new User({id: data.id}).save(toUpdate, {patch: true});
+      return res.json({errors: false, data: toUpdate});
+    } else {
+      return res.status(404).json({ errors: 'User not found', data: {} });
+    }
+  } catch (err) {
+    return res.status(500).json({ errors: [err.message], data: {} });
+  }
 });
 // DELETE
 router.delete('/:id([0-9]+)', (req, res) => {
