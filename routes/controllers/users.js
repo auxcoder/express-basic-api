@@ -18,9 +18,9 @@ router.get('/', async (req, res) => {
   }
 });
 // CREATE
-router.post('/', newUser(), validate, (req, res) => {
-  hashPassword(req.body.password, constants.saltRounds)
-    .then(data => {
+router.post('/', newUser(), validate, async (req, res) => {
+    try {
+      const data = await hashPassword(req.body.password, constants.saltRounds);
       const dataMerged = Object.assign(
         {
           email: req.body.email,
@@ -34,20 +34,17 @@ router.post('/', newUser(), validate, (req, res) => {
           active: true,
           role: 1, // guess by default
           veroken: jwtSign(
-            Object.assign(req.body, { role: 1, email_verified: false }),
+            Object.assign(req.body, {role: 1, email_verified: false}),
             'verification',
             constants.ttlVerify
           ),
         }
       );
-      new Users(dataMerged)
-        .save()
-        .then(data => res.status(201).json({ errors: false, data: { id: data.id } }))
-        .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
-    })
-    .catch(err => {
-      res.status(500).json({ errors: [err.message], data: {} });
-    });
+      const user = await new User(dataMerged).save();
+      return res.status(201).json({ errors: false, data: {id: user.id }});
+    } catch (err) {
+      res.status(500).json({errors: [err.message], data: {}});
+    }
 });
 // READ
 router.get('/:id([0-9]+)', async (req, res) => {
@@ -55,12 +52,12 @@ router.get('/:id([0-9]+)', async (req, res) => {
   try {
     const data = await User.query({where: {id: req.params.id}}).fetch({require: true});
     if (!data) {
-      res.status(404).json({ errors: true, message: 'User not found' });
+      res.status(404).json({errors: true, message: 'User not found'});
     } else {
-      res.json({ errors: false, data: data });
+      res.json({errors: false, data: data});
     }
   } catch (err) {
-    res.status(500).json({ errors: [err.message], data: {} })
+    res.status(500).json({errors: [err.message], data: {}})
   }
 })
 // UPDATE
