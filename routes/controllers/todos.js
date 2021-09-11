@@ -1,19 +1,23 @@
 
 import express from 'express';
-import Todos from '../../db/models/todos.js';
-import {validateTodo}  from '../middlewares/validateTodo.js';
+import Todo from '../../db/models/todos.js';
+import {validateTodo, getTodos}  from '../middlewares/validateTodo.js';
 import validate from '../middlewares/validate.js';
 const router = express.Router();
 
 // READ
-router.get('/', (req, res) => {
-  Todos.fetchAll()
-    .then(data => res.json({ errors: false, data: data }))
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+router.get('/', getTodos(), validate, async (req, res) => {
+  if (!req.body.user_id) console.error('quote ID is required');
+  try {
+    const data = await Todo.query().select().where({user_id: req.body.user_id});
+    return res.json({errors: false, data: data})
+  } catch (err) {
+    res.status(500).json({errors: [err.message], data: {}})
+  }
 });
 // CREATE
 router.post('/', validateTodo(), validate, (req, res) => {
-  new Todos({
+  new Todo({
     title: req.body.title,
     completed: req.body.completed,
   })
