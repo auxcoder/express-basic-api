@@ -50,22 +50,19 @@ router.post('/', newUser(), validate, (req, res) => {
     });
 });
 // READ
-router.get('/:id([0-9]+)', (req, res) => {
+router.get('/:id([0-9]+)', async (req, res) => {
   if (!req.params.id) console.error('quote ID is required');
-  Users.where('id', req.params.id)
-    .fetch({
-      require: true,
-      withRelated: ['tokens'],
-    })
-    .then(data => {
-      if (!data) {
-        res.status(404).json({ errors: true, message: 'User not found' });
-      } else {
-        res.json({ errors: false, data: data });
-      }
-    })
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
-});
+  try {
+    const data = await User.query({where: {id: req.params.id}}).fetch({require: true});
+    if (!data) {
+      res.status(404).json({ errors: true, message: 'User not found' });
+    } else {
+      res.json({ errors: false, data: data });
+    }
+  } catch (err) {
+    res.status(500).json({ errors: [err.message], data: {} })
+  }
+})
 // UPDATE
 router.patch('/:id([0-9]+)', patchUser, (req, res) => {
   if (!req.params.id) console.error('user ID is required');
