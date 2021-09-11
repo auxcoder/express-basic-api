@@ -1,7 +1,7 @@
 
 import express from 'express';
 import Todo from '../../db/models/todos.js';
-import {getTodos, getTodo, createTodo}  from '../middlewares/validateTodo.js';
+import {getTodos, getTodo, createTodo, patchTodo}  from '../middlewares/validateTodo.js';
 import validate from '../middlewares/validate.js';
 const router = express.Router();
 
@@ -43,20 +43,20 @@ router.get('/:id([0-9]+)', getTodo(), validate, async (req, res) => {
   }
 });
 // UPDATE
-router.patch('/:id([0-9]+)', validateTodo(), validate, (req, res) => {
+router.patch('/:id([0-9]+)', patchTodo(), validate, async (req, res) => {
   if (!req.params.id) console.error('todo ID is required');
-  new Todos('id', req.params.id)
-    .fetch({ require: true })
-    .then(todo => {
-      todo
-        .save({
-          title: req.body.title || todo.title,
-          completed: req.body.completed || todo.completed,
-          updated_at: new Date().toISOString(),
-        })
-        .then(data => res.json({ errors: false, data: data, message: 'Todo updated' }));
-    })
-    .catch(err => res.status(500).json({ errors: [err.message] }));
+  try {
+    const data = await Todo.query({where: {id: req.params.id}}).fetch({require: true});
+    if (data) {
+      const toUpdate = Object.assign(req.body, {updated_at: new Date().toISOString()})
+      await new Todo({id: data.id}).save(toUpdate, {patch: true});
+      return res.json({ errors: false, data: data, message: 'Todo updated'})
+    } else {
+      return res.status(404).json({errors: 'User not found', data: {}});
+    }
+  } catch (err) {
+    return res.status(500).json({ errors: [err.message] })
+  }
 });
 // DELETE
 router.delete('/:id([0-9]+)', (req, res) => {
