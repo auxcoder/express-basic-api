@@ -1,7 +1,7 @@
 
 import express from 'express';
 import Todo from '../../db/models/todos.js';
-import {validateTodo, getTodos}  from '../middlewares/validateTodo.js';
+import {getTodos, getTodo, createTodo}  from '../middlewares/validateTodo.js';
 import validate from '../middlewares/validate.js';
 const router = express.Router();
 
@@ -16,20 +16,20 @@ router.get('/', getTodos(), validate, async (req, res) => {
   }
 });
 // CREATE
-router.post('/', validateTodo(), validate, async (req, res) => {
+router.post('/', createTodo(), validate, async (req, res) => {
   try {
       const data = await new Todo({
         title: req.body.title,
         completed: req.body.completed,
         user_id: req.body.user_id
       }).save();
-      return res.status(201).json({ errors: false, data: data })
+      return res.status(201).json({errors: false, data: data})
     } catch (err) {
-      res.status(500).json({ errors: [err.message], data: {} })
+      res.status(500).json({errors: [err.message], data: {}})
     }
 });
 // READ
-router.get('/:id([0-9]+)', (req, res) => {
+router.get('/:id([0-9]+)', getTodo(), validate, async (req, res) => {
   if (!req.params.id) console.error('quote ID is required');
   Todos.where('id', req.params.id)
     .fetch()
