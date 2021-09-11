@@ -16,14 +16,17 @@ router.get('/', getTodos(), validate, async (req, res) => {
   }
 });
 // CREATE
-router.post('/', validateTodo(), validate, (req, res) => {
-  new Todo({
-    title: req.body.title,
-    completed: req.body.completed,
-  })
-    .save()
-    .then(data => res.status(201).json({ errors: false, data: data }))
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+router.post('/', validateTodo(), validate, async (req, res) => {
+  try {
+      const data = await new Todo({
+        title: req.body.title,
+        completed: req.body.completed,
+        user_id: req.body.user_id
+      }).save();
+      return res.status(201).json({ errors: false, data: data })
+    } catch (err) {
+      res.status(500).json({ errors: [err.message], data: {} })
+    }
 });
 // READ
 router.get('/:id([0-9]+)', (req, res) => {
