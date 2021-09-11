@@ -78,15 +78,17 @@ router.patch('/:id([0-9]+)', patchUser(), validate, async (req, res) => {
   }
 });
 // DELETE
-router.delete('/:id([0-9]+)', (req, res) => {
+router.delete('/:id([0-9]+)', async (req, res) => {
   if (!req.params.id) console.error('user ID is required');
-  let options = { require: true };
+  let options = {require: true};
   // hard remove test record if env is dev
   if (process.env.NODE_ENV === 'test') options.hardDelete = true;
-  new Users('id', req.params.id)
-    .destroy(options)
-    .then(() => res.json({ errors: false, message: 'User removed' }))
-    .catch(err => res.status(500).json({ errors: [err.message], data: {} }));
+  try {
+    await new User('id', req.params.id).destroy();
+    return res.json({errors: false, message: 'User removed'});
+  } catch (err) {
+    res.status(500).json({ errors: [err.message], data: {} })
+  }
 });
 
 export default router;
