@@ -1,39 +1,39 @@
-// #region
 const app = require('../../server');
 const assert = require('assert');
-import jwtSign from '../utils/jwtSign.js';
-// .agent(app.listen()) is used when the --watch flag is used with Mocha.
-// but only when I ran that watching command as a npm script from package.json.
+import {jwtSign} from '../../utils/jwtSign';
 const request = require('supertest').agent(app.listen());
 var chance = require('chance').Chance();
-const todoObj = {
-  title: chance.sentence({ words: 5 }),
-  completed: chance.bool({ likelihood: 30 }),
+const newUser = {
+  username: `test${chance.word({ length: 4 })}`,
+  email: chance.email(),
+  password: `${chance.character({ casing: 'upper' })}${chance.word({ length: 5 })}${chance.natural({
+    min: 1,
+    max: 9,
+  })}${chance.character({ symbols: true })}`,
 };
-let modelId;
 const testUser = {
   email: 'kiubmen@gmail.com',
   username: 'kiubmen',
   password: 'password',
 };
+let modelId;
 const token = jwtSign(
   {
-    name: testUser.username,
+    username: testUser.username,
     email: testUser.email,
     role: 1,
-    vrf: testUser.verified,
+    verified: testUser.verified,
   },
   'auth',
-  60 * 60
+  String(60 * 60)
 );
-// #endregion
+
 // READ all/paginate
-describe('GET /todos', () => {
-  it('should get all todos records', done => {
+describe('GET /users', () => {
+  it('should get all users records', done => {
     request
-      .get('/api/todos')
-      // by default
-      // .set('Accept', 'application/json')
+      .get('/api/users')
+      // .set('Accept', 'application/json') // by default
       .set('Authorization', `bearer ${token}`)
       .expect(200)
       .expect(res => {
@@ -47,19 +47,16 @@ describe('GET /todos', () => {
   });
 });
 // CREATE
-describe('POST /todos', () => {
-  it('should create a new Todo', done => {
+describe('POST /users', () => {
+  it('should create a new User', done => {
     request
-      .post('/api/todos')
-      .send(todoObj)
+      .post('/api/users')
       .set('Authorization', `bearer ${token}`)
+      .send(newUser)
       .expect(201)
       .expect(res => {
         modelId = res.body.data.id;
-        // check that the source data is in the res
-        Object.keys(todoObj).forEach(key => {
-          assert.equal(todoObj[key], res.body.data[key]);
-        });
+        assert.equal(res.body.errors, false);
       })
       .end((err, res) => {
         if (err) return done(err);
@@ -67,17 +64,16 @@ describe('POST /todos', () => {
       });
   });
 });
-// READ one
-describe('GET /todos/<id>', () => {
-  it('should get one record', done => {
+// READ
+describe('GET /users/<id>', () => {
+  it('should get a User by id', done => {
     request
-      .get(`/api/todos/${modelId}`)
+      .get(`/api/users/${modelId}`)
       .set('Authorization', `bearer ${token}`)
       .expect(200)
       .expect(res => {
-        Object.keys(todoObj).forEach(key => {
-          assert.equal(todoObj[key], res.body.data[key]);
-        });
+        modelId = res.body.data.id;
+        assert.equal(res.body.errors, false);
       })
       .end((err, res) => {
         if (err) return done(err);
@@ -86,12 +82,12 @@ describe('GET /todos/<id>', () => {
   });
 });
 // UPDATE
-describe('PATCH /todos/<id>', () => {
-  it('should update a todo record', done => {
+describe('PATCH /users/<id>', () => {
+  it('should update a user record', done => {
     request
-      .patch(`/api/todos/${modelId}`)
+      .patch(`/api/users/${modelId}`)
       .set('Authorization', `bearer ${token}`)
-      .send(Object.assign(todoObj, { completed: true }))
+      .send(Object.assign(newUser, { email: chance.email() }))
       .expect(200)
       .expect(res => {
         assert.equal(res.body.errors, false);
@@ -103,10 +99,10 @@ describe('PATCH /todos/<id>', () => {
   });
 });
 // DELETE
-describe('DELETE /todos/<id>', () => {
-  it('should remove a todo record', done => {
+describe('DELETE /users/<id>', () => {
+  it('should remove a user record', done => {
     request
-      .delete(`/api/todos/${modelId}`)
+      .delete(`/api/users/${modelId}`)
       .set('Authorization', `bearer ${token}`)
       .expect(200)
       .expect(res => {
@@ -120,7 +116,7 @@ describe('DELETE /todos/<id>', () => {
 
   it('should trow a 404', done => {
     request
-      .delete(`/api/todos/${modelId}`)
+      .delete(`/api/users/${modelId}`)
       .set('Authorization', `bearer ${token}`)
       .expect(500)
       .end(done);

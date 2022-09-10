@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import type {TLooseObj} from '../types/common';
 let env = process.env.NODE_ENV || 'development';
 if (process.env.NODE_ENV !== 'production') dotenv.config();
 
@@ -13,6 +14,22 @@ const emailData = {
 const environment = {
   env: process.env.NODE_ENV || 'development',
 };
+
+type EmailData = {
+  supportEmail: string
+  companyName: string
+  companyAddress: string
+  companyUrl: string
+  postmarkId: string,
+}
+
+type EnvConfig = {
+  port: number;
+  ttlVerify: number;
+  ttlAuth: number;
+  saltRounds: number;
+  emailData: EmailData;
+}
 
 const constants = {
   development: Object.assign(
@@ -47,4 +64,4 @@ const constants = {
   ),
 };
 
-export default constants[env];
+export default constants[env]<TLooseObj>;

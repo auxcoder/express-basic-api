@@ -1,4 +1,4 @@
-module.exports = function(app) {
+module.exports = function(app: {get: (arg0: string, arg1: {(req: any, res: any): any; (req: any, res: any): any; (req: any, res: any): any;}) => void;}) {
   app.get('/', (req, res) => res.send('Get request received at "/"'));
   // 'server_status' is used by the AWS load balancer for verifying that the backend is up and running
   // It's separate from /api/ping in case we need to change it at some point

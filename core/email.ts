@@ -1,5 +1,5 @@
 import postmark from 'postmark';
-import constants from '../config/constants.js';
+import constants from '../config/constants';
 const client = new postmark.Client(constants.postmarkId);
 import nodemailer from "nodemailer";
 
@@ -79,9 +79,9 @@ const emailRepository = {
    * @returns A promise that's resolved with the sent email with
    */
   sendWithAttachments: async function sendWithAttachments(
-    from,
-    to,
-    subject,
+    from: any,
+    to: any,
+    subject: any,
     attachments = [],
     templateId = null,
     template = {}
@@ -93,9 +93,8 @@ const emailRepository = {
       Subject: subject,
       Attachments: attachments,
       TemplateId: templateId,
-      TemplateModel: template,
     };
-    if (!email.TemplateId) delete email.TemplateModel;
+    if (!email.TemplateId) Object.assign(email, {TemplateModel: template,});
     const resolvedData = await client.sendEmail(email);
     console.debug(resolvedData);
     return resolvedData;
