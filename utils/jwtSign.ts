@@ -1,9 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client'
-// import {Profile} from 'passport';
 import {Profile} from '../types/common';
 
-export function jwtSign(userProfile: Partial<User>, secret: string, jwtExpiresIn: string): string {
+export function jwtSign(userProfile: Partial<User>, secret: string, jwtExpiresIn: number): string {
   return jwt.sign(userProfile, secret, {expiresIn: Number(jwtExpiresIn)});
 }
 

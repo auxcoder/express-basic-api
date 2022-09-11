@@ -32,36 +32,32 @@ type EnvConfig = {
 }
 
 const constants = {
-  development: Object.assign(
-    {
-      port: 5000,
-      ttlVerify: 60 * 60 * 2, // two days (sec * min * 2)
-      ttlAuth: 60 * 60 * 24 * 7 * 2, // two weeks (sec * min * day * week * 2)
-      saltRounds: 10,
-    },
+  development: {
+    port: 5000,
+    ttlVerify: 60 * 60 * 2, // two days (sec * min * 2)
+    ttlAuth: 60 * 60 * 24 * 7 * 2, // two weeks (sec * min * day * week * 2)
+    saltRounds: 10,
     emailData,
     environment
-  ),
-  test: Object.assign(
-    {
-      port: 5000,
-      ttlVerify: 60 * 60, // one hour
-      ttlAuth: 60 * 60, // one hour
-      saltRounds: 2,
-    },
+  },
+  test: {
+    port: 5000,
+    ttlVerify: 60 * 60, // one hour
+    ttlAuth: 60 * 60, // one hour
+    saltRounds: 2,
     emailData,
     environment
-  ),
-  production: Object.assign(
-    {
-      port: 5000,
-      ttlVerify: 60 * 60 * 2, // two days (sec * min * 2)
-      ttlAuth: 60 * 60 * 24 * 7 * 2, // two weeks (sec * min * day * week * 2)
-      saltRounds: 10,
-    },
+  },
+  production: {
+    port: 5000,
+    ttlVerify: 60 * 60 * 2, // two days (sec * min * 2)
+    ttlAuth: 60 * 60 * 24 * 7 * 2, // two weeks (sec * min * day * week * 2)
+    saltRounds: 10,
     emailData,
     environment
-  ),
+  },
 };
 
-export default constants[env]<TLooseObj>;
+export default (function(obj: TLooseObj, e: string): EnvConfig {
+  return obj[e];
+})(constants, env)

@@ -1,7 +1,8 @@
-import postmark from 'postmark';
+import * as postmark from 'postmark';
 import constants from '../config/constants';
-const client = new postmark.Client(constants.postmarkId);
 import nodemailer from "nodemailer";
+const client = new postmark.ServerClient(constants.emailData.postmarkId);
+let env = process.env.NODE_ENV || 'development';
 
 async function mock() {
   let promise = new Promise((resolve, reject) => {
@@ -31,10 +32,11 @@ const emailRepository = {
    * @param {Object} [templateModel={}]
    * @returns A promise that's resolved with the sent email
    */
-  sendWelcome: async function sendWelcome(from, to, templateModel = {}) {
-    if (constants.env === 'test') return await mock();
+  sendWelcome: async function sendWelcome(from: string, to: string, templateModel = {}) {
+    if (env === 'test') return await mock();
+
     try {
-      if (ENV === 'development') {
+      if (env === 'development') {
         const account = await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
@@ -48,9 +50,9 @@ const emailRepository = {
         const mailOptions = {
           from: from, // sender address
           to: to, // list of receivers
-          subject: `Wellcome to ${constants.companyName}`, // Subject line
-          text: `verify account at: ${constants.companyUrl}`, // plain text body
-          html: `<a href="${constants.companyUrl}" target="_blank">Click to confirm account</a>` // html body
+          subject: `Wellcome to ${constants.emailData.companyName}`, // Subject line
+          text: `verify account at: ${constants.emailData.companyUrl}`, // plain text body
+          html: `<a href="${constants.emailData.companyUrl}" target="_blank">Click to confirm account</a>` // html body
         };
         const info = await transporter.sendMail(mailOptions);
         return info;
@@ -86,7 +88,7 @@ const emailRepository = {
     templateId = null,
     template = {}
   ) {
-    if (constants.env === 'test') return await mock();
+    if (env === 'test') return await mock();
     const email = {
       From: from,
       To: to,

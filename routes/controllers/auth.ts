@@ -1,19 +1,16 @@
 import express from 'express';
 import passport from 'passport';
-import jwt from 'jsonwebtoken';
 import { newUser, existUser } from '../middleware/validateUser';
 import { hasAuthToken, verifyEmail } from '../middleware/hasAuthToken';
 import validate from '../middleware/validate';
 import {jwtSign, jwtVerify} from '../../utils/jwtSign';
-import { promisify } from 'util';
 import hashPassword from '../../utils/hashPass';
 import buildTemplateModel from '../../utils/buildTemplateModel';
 import emailRepository from '../../core/email';
 import constants from '../../config/constants';
 import prisma from '../../db/prisma'
 import HttpErrors from 'http-errors'
-import {profile} from 'winston';
-const verifyAsync = promisify(jwt.verify);
+// import {profile} from 'winston';
 const router = express.Router();
 
 // READ exist
@@ -56,7 +53,7 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
     await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
       newUser.email,
-      buildTemplateModel(user, req.body.client)
+      buildTemplateModel(newUser, req.body.client)
     );
 
     return res.status(201).json({ errors: false, data: {id: newUser.id}});

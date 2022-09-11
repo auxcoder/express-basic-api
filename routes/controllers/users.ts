@@ -1,12 +1,13 @@
 import express from 'express';
-import constants from '../../config/constants.js';
+import constants from '../../config/constants';
 // import User from '../../db/models/users';
-import {newUser, patchUser} from '../middleware/validateUser.js';
-import {jwtSign} from '../../utils/jwtSign.js';
-import hashPassword from '../../utils/hashPass.js';
-import validate from '../middleware/validate.js';
-import prisma from '../../db/prisma.js';
+import {newUser, patchUser} from '../middleware/validateUser';
+import {jwtSign} from '../../utils/jwtSign';
+import hashPassword from '../../utils/hashPass';
+import validate from '../middleware/validate';
+import prisma from '../../db/prisma';
 const router = express.Router();
+
 // READ all
 router.get('/', async (req: express.Request, res: express.Response) => {
   try {
@@ -18,6 +19,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
     return res.status(500).json({ errors: [err.message], data: {} })
   }
 });
+
 // CREATE
 router.post('/', newUser(), validate, async (req: express.Request, res: express.Response) => {
     try {
@@ -46,6 +48,7 @@ router.post('/', newUser(), validate, async (req: express.Request, res: express.
       res.status(500).json({errors: [err.message], data: {}});
     }
 });
+
 // READ
 router.get('/:id([0-9]+)', async (req: express.Request, res: express.Response) => {
   if (!req.params.id) console.error('quote ID is required');
@@ -60,6 +63,7 @@ router.get('/:id([0-9]+)', async (req: express.Request, res: express.Response) =
     res.status(500).json({errors: [err.message], data: {}});
   }
 })
+
 // UPDATE
 router.patch('/:id([0-9]+)', patchUser(), validate, async (req: express.Request, res: express.Response) => {
   if (!req.params.id) console.error('user ID is required');
@@ -77,6 +81,7 @@ router.patch('/:id([0-9]+)', patchUser(), validate, async (req: express.Request,
     return res.status(500).json({errors: [err.message], data: {}});
   }
 });
+
 // DELETE
 router.delete('/:id([0-9]+)', async (req: express.Request, res: express.Response) => {
   if (!req.params.id) console.error('user ID is required');

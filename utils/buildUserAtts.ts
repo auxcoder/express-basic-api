@@ -1,5 +1,5 @@
 import {jwtSign} from './jwtSign';
-import constants from '../config/constants.js';
+import constants from '../config/constants';
 import { User } from '@prisma/client'
 
 const buildUserAttrs = (user: Partial<User>, data: {salt: string; itr: number; hash: string}) => {

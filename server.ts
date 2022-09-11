@@ -1,12 +1,12 @@
 import express from 'express';
 import apiRoutes from './routes/index';
 import miscRoutes from './routes/misc';
-import validateReqBody from './routes/middleware/validateReqBody.js';
-import catchRoute from './routes/middleware/catchRoute.js';
+import validateReqBody from './routes/middleware/validateReqBody';
+import catchRoute from './routes/middleware/catchRoute';
 import passport from './core/passport';
 import dotenv from 'dotenv';
 if (process.env.NODE_ENV !== 'production') dotenv.config();
-// import logger from './core/logger.js';
+// import logger from './core/logger';
 
 var app = express();
 
