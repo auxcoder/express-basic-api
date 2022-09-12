@@ -1,7 +1,8 @@
+import {Request} from 'express';
 import createError from "http-errors";
 
-export default function validateReqBody(req, res, next) {
-  function requireBodyAttr(method) {
+export default function validateReqBody(req: Request, res: any, next: any) : void {
+  function requireBodyAttr(method: string) {
     return ['PATCH', 'PUT', 'POST'].indexOf(method) !== -1;
   }
 

@@ -1,6 +1,6 @@
 const app = require('../../server');
 const assert = require('assert');
-import jwtSign from '../utils/jwtSign.js';
+import {jwtSign} from '../../utils/jwtSign';
 const request = require('supertest').agent(app.listen());
 var chance = require('chance').Chance();
 const newUser = {
@@ -19,13 +19,13 @@ const testUser = {
 let modelId;
 const token = jwtSign(
   {
-    name: testUser.username,
+    username: testUser.username,
     email: testUser.email,
     role: 1,
-    vrf: testUser.verified,
+    verified: testUser.verified,
   },
   'auth',
-  60 * 60
+  String(60 * 60)
 );
 
 // READ all/paginate

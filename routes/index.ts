@@ -1,8 +1,8 @@
 import express from 'express';
 import passport from 'passport';
-import todosRoute from './controllers/todos.js';
-import usersRoute from './controllers/users.js';
-import authRoute from './controllers/auth.js';
+import todosRoute from './controllers/todos';
+import usersRoute from './controllers/users';
+import authRoute from './controllers/auth';
 
 // routes
 const router = express.Router();
