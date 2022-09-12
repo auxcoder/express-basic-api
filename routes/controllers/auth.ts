@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import passport from 'passport';
 import { newUser, existUser } from '../middleware/validateUser';
@@ -10,6 +11,7 @@ import emailRepository from '../../core/email';
 import constants from '../../config/constants';
 import prisma from '../../db/prisma'
 import HttpErrors from 'http-errors'
+if (process.env.NODE_ENV !== 'production') dotenv.config();
 // import {profile} from 'winston';
 const router = express.Router();
 
@@ -31,6 +33,11 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
     if (user) throw new HttpErrors.Forbidden('User taken')
 
     const data = await hashPassword(password, constants.saltRounds);
+    const verifiedToken =jwtSign(
+      Object.assign(req.body, {role: 1, email_verified: false}),
+      process.env.SECRET || 'secret',
+      constants.ttlVerify
+    )
     const newUser = await prisma.user.create({
       data : {
         username: username,
@@ -41,22 +48,21 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
         verified: false,
         active: true,
         role: 1, // guess by default
-        veroken: jwtSign(
-          Object.assign(req.body, {role: 1, email_verified: false}),
-          'verification',
-          constants.ttlVerify
-        ),
       }
     })
-
+    const newToken = await prisma.token.create({data: {
+      token: verifiedToken,
+      user_id:  newUser.id,
+      active: true,
+    }});
     // const model = await new Users(userObj).save();
     await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
       newUser.email,
-      buildTemplateModel(newUser, req.body.client)
+      buildTemplateModel({ username: newUser.username, email: newUser.email, verify_token: newToken.token } , req.body.client)
     );
 
-    return res.status(201).json({ errors: false, data: {id: newUser.id}});
+    return res.status(201).json({errors: false, data: {id: newToken.token}});
 
   } catch (error: any) {
     res.json({errors: [error.message], data: {}});
@@ -112,17 +118,15 @@ router.post('/verify', verifyEmail(), validate, async (req: express.Request, res
 
     // verify token integrity
     const verified = await jwtVerify(token, 'secret')
-    console.log('log > verified >', verified);
     if (typeof verified !== 'string' && !verified.email) throw new HttpErrors.Unauthorized('Invalid token')
 
-    const user = await prisma.user.update({
-      where: {id: tokenRecord.user_id},
-      data: {verified: true}
-    });
+    // mark user as verified
+    const user = await prisma.user.update({where: {id: tokenRecord.user_id}, data: {verified: true}});
 
     // deactivate verification token
     await prisma.token.update({where: {token: token}, data: {active: false}})
 
+    return res.json({errors: false, data: {id: user.id}});
   } catch (error: any) {
     res.json({errors: [error.message], data: {}});
   }

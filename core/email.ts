@@ -10,7 +10,7 @@ async function mock() {
       () =>
         resolve({
           To: null, // <email@domain>
-          SubmittedAt: null, // <timestampz>
+          SubmittedAt: null, // <timestamps>
           MessageID: null, // <uuid>
           ErrorCode: 0, //
           Message: 'OK', //
@@ -26,7 +26,7 @@ async function mock() {
  */
 const emailRepository = {
   /**
-   * Send an email using a template aliase name and passing a data object
+   * Send an email using a template aliases name and passing a data object
    * @param {String} from
    * @param {String} to
    * @param {Object} [templateModel={}]
@@ -50,7 +50,7 @@ const emailRepository = {
         const mailOptions = {
           from: from, // sender address
           to: to, // list of receivers
-          subject: `Wellcome to ${constants.emailData.companyName}`, // Subject line
+          subject: `Welcome to ${constants.emailData.companyName}`, // Subject line
           text: `verify account at: ${constants.emailData.companyUrl}`, // plain text body
           html: `<a href="${constants.emailData.companyUrl}" target="_blank">Click to confirm account</a>` // html body
         };
@@ -71,7 +71,7 @@ const emailRepository = {
   },
 
   /**
-   * Send an email using a template aliase name and a collection of attachments
+   * Send an email using a template aliases name and a collection of attachments
    * @param {String} from
    * @param {String} to
    * @param {String} subject

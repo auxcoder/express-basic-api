@@ -25,7 +25,7 @@ router.post('/', newUser(), validate, async (req: express.Request, res: express.
     try {
       const {email, username, password} = req.body
       const data = await hashPassword(password, constants.saltRounds);
-      const user = await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           username: username,
           password: data.hash, // todo: should db field match "hash"
@@ -35,15 +35,20 @@ router.post('/', newUser(), validate, async (req: express.Request, res: express.
           verified: false,
           active: true,
           role: 1, // guess by default
-          veroken: jwtSign(
-            Object.assign(req.body, {role: 1, email_verified: false}),
-            'verification',
-            constants.ttlVerify
-          ),
         }
       })
+      const token = jwtSign(
+        Object.assign(req.body, {role: 1, email_verified: false}),
+        'verification',
+        constants.ttlVerify
+      )
+      const newToken = await prisma.token.create({data: {
+        token: token,
+        user_id:  newUser.id,
+        active: true,
+      }});
       // const user = await new User(dataMerged).save();
-      return res.status(201).json({ errors: false, data: {id: user.id }});
+      return res.status(201).json({ errors: false, data: {id: newUser.id }});
     } catch (err: any) {
       res.status(500).json({errors: [err.message], data: {}});
     }

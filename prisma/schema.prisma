@@ -27,7 +27,6 @@ model User {
   itr      Int
   email    String   @unique
   verified Boolean  @default(false)
-  veroken  String
   active   Boolean
   role     Int
   token    Token[]

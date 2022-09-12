@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') dotenv.config();
 const emailData = {
   supportEmail: 'support@test.com',
   companyName: 'My Company',
-  companyAddress: 'Rue Sant Michelle, 234 France',
+  companyAddress: 'Rue Michelle, 234 France',
   companyUrl: 'https:example.com',
   postmarkId: process.env.POSTMARK_ID,
 };
