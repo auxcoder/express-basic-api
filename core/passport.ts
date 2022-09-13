@@ -14,15 +14,21 @@ passport.use(
       session: false,
     },
     async (email, password, done) => {
-      const user = await prisma.user.findUnique( {
-        where: {email: email},
-        select: { id: true, verified: true, username: true, email: true, role: true, password: true }
-      });
+      try {
+        const user = await prisma.user.findUniqueOrThrow( {
+          where: {email: email},
+          select: { id: true, verified: true, username: true, email: true, role: true, password: true }
+        });
 
-      if (user === null) return done(null, false, {message: 'LocalStrategy user not found.'});
-      if (!bcrypt.compareSync(password, user.password)) return done(null, false, {message: 'Wrong password.'});
+        if (!user) return done(null, false, {message: 'LocalStrategy user not found.'});
+        if (!bcrypt.compareSync(password, user.password)) return done(null, false, {message: 'Wrong password.'});
 
-      return done(null, user, {message: 'Logged In Successfully'});
+        return done(null, user, {message: 'Logged In Successfully'});
+
+      } catch (error) {
+        if (error instanceof Error) return done(null, false, {message: error.message});
+        return done(null, false, {message: 'Unexpected error'});
+      }
     }
   )
 );

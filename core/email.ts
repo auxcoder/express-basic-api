@@ -2,10 +2,10 @@ import * as postmark from 'postmark';
 import constants from '../config/constants';
 import nodemailer from "nodemailer";
 const client = new postmark.ServerClient(constants.emailData.postmarkId);
-let env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development';
 
 async function mock() {
-  let promise = new Promise((resolve, reject) => {
+  const promise = new Promise((resolve, reject) => {
     setTimeout(
       () =>
         resolve({
@@ -81,9 +81,9 @@ const emailRepository = {
    * @returns A promise that's resolved with the sent email with
    */
   sendWithAttachments: async function sendWithAttachments(
-    from: any,
-    to: any,
-    subject: any,
+    from: string,
+    to: string,
+    subject: string,
     attachments = [],
     templateId = null,
     template = {}
