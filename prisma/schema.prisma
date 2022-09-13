@@ -20,18 +20,19 @@ model Todo {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  username String
-  password String
-  salt     String
-  itr      Int
-  email    String   @unique
-  verified Boolean  @default(false)
-  active   Boolean
-  role     Int
-  token    Token[]
-  iat      DateTime @default(now())
-  uat      DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  username     String
+  password     String
+  salt         String
+  itr          Int
+  email        String   @unique
+  verified     Boolean  @default(false)
+  active       Boolean
+  role         Int
+  token        Token[]
+  verify_token String
+  iat          DateTime @default(now())
+  uat          DateTime @updatedAt
 }
 
 model Token {
