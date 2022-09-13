@@ -35,8 +35,6 @@ knex migrate:latest
 knex migrate:rollback
 ```
 
-
-
 ---
 
 ## Running tests
@@ -65,7 +63,7 @@ Another options is using Nodemon, as a npm package script:
 
 ## Logs
 
-Logs gets writen to file from level `debug` and up in the `all-logs.log` files under **/logs** dir. Errors get logged too into `errors.log` files.
+Logs gets written to file from level `debug` and up in the `all-logs.log` files under **/logs** dir. Errors get logged too into `errors.log` files.
 Related logic in `/core/logger`, using **[Winston](https://github.com/winstonjs/winston)**.
 
 TODO:
@@ -80,29 +78,19 @@ TODO:
 - [Access Control Lists for Node](https://github.com/optimalbits/node_acl)
 - [Role and Attribute based Access Control](https://github.com/onury/accesscontrol)
 
-- [How To Structure Bookshelf models](http://billpatrianakos.me/blog/2015/11/30/how-to-structure-bookshelf-dot-js-models/)
-- [Bookshelf Js A Node Js Orm](https://stackabuse.com/bookshelf-js-a-node-js-orm/)
-- [Bookshelf Modelbase](https://github.com/bsiddiqui/bookshelf-modelbase)
+
 - [Assert NodeJS](https://unitjs.com/guide/assert-node-js.html)
-
 - [Tests, Superagent](http://visionmedia.github.io/superagent/#authentication)
-
-### Relations
-
-- [Issue 83](https://github.com/bookshelf/bookshelf/issues/83)
-- [Issue 1088](https://github.com/bookshelf/bookshelf/issues/1088)
 
 ### Refs
 
 - [Building A Node Js Rest Api With Express - Part 1](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-46b0901f29b6)
 - [Building A Node Js Rest Api With Express - Part 2](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-part-two-9152661bf47)
 - [Express API ES6 Starter](https://codesandbox.io/s/lsn9y)
-- [Bookshelf.js tutorial](https://zetcode.com/javascript/bookshelf/)
+- [Building a Node.js REST API with Express](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-46b0901f29b6)
 
 #### Docs
 
-- [BookshelfJS](https://bookshelfjs.org/api.html)
-- [BookshelfJS 'registry' plugin](https://github.com)
 - [KnexJS](https://knexjs.org/)
 - [SQLite](http://www.sqlitetutorial.net/)
 - [WinstonJS](https://github.com/winstonjs/winston)
@@ -115,32 +103,35 @@ TODO:
 
 ```sh
 ├── config                # App configuration files
-│  ├─ sequalize.json      # Sequalize config
 │  ├─ serviceOne.json     # ServiceOne config
 │  └─ ...                 # Other configurations
-├── routes
-│  ├─ controllers         # Request managers
-│  ├─ middlewares         # Request middlewares
-│  └─ routes.js           # Define routes and middlewares here
-├── services              # External services implementation
-│  ├─ serviceOne
-│  └─ serviceTwo
-│  └─ ...                 # Other services
-├── db                    # Data access stuff  (Sequalize mostly)
-│  ├─ models              # Models
-│  ├─ migrations          # Migrations
-│  ├─ seeds               # Seeds
-│  └─ index.js            # Sequalize instantiation
 ├── core                  # Business logic implementation
 │  ├─ accounts.js
 │  ├─ sales.js
 │  ├─ comments.js
 │  └─ ...                 # Other business logic implementations
+├── logs
+│  ├─ all-logs.log        # all logs
+│  └─ error-logs.log      # error logs
+├── prisma                # Prisma ORM
+│  ├─ migrations
+│  │  ├─ migration_<name>   # Migrations
+│  │  └─ migrations_lock.toml # sqlite DB
+│  ├─ accounts.js
+│  └─ dev.db              # sqlite DB
+├── db                    # Data access stuff
+│  └─ prisma.js           # DB instantiation
+├── routes
+│  ├─ controllers         # Request managers
+│  ├─ middleware         # Request middleware
+│  └─ routes.js           # Define routes here
+├── types              # External services implementation
+│  ├─ ...
+│  └─ common.js                 # Other services
 ├─ utils                  # Util libs (formats, validation, etc)
 ├─ tests                  # Testing
 ├─ scripts                # Standalone scripts for dev uses
 ├─ pm2.js                 # pm2 init
-├─ shipitfile.js          # deployment automation file
 ├─ package.json
 ├─ README.md
 └─ app.js                 # App starting point
@@ -157,78 +148,3 @@ TODO:
 - **500**  INTERNAL SERVER ERROR, Unknown server error has occurred
 
 ---
-
-### Examples of bookshelf
-
-```js
-var sqlite3 = require('sqlite3').verbose();
-const dbname = 'test';
-var db = new sqlite3.Database(`./${dbname}.db`, err => {
-  if (err) return console.error(err.message);
-  console.log(`Connected to the ${dbname} SQlite database.`);
-});
-
-db.serialize(() => {
-  db.run(
-    `CREATE TABLE IF NOT EXISTS quotes(
-      id INTEGER PRIMARY KEY,
-      quote TEXT,
-      author VARCHAR(255),
-      year VARCHAR(255)
-    )`
-  );
-});
-
-app.post('/:id', function(req, res) {
-  var columnsList = Object.keys(req.body)
-    .map(key => {
-      return ` ${key} = '${req.body[key]}'`;
-    })
-    .join(',');
-  db.serialize(() => {
-    db.run(
-      `UPDATE quotes
-      SET ${columnsList}
-      WHERE id = ?`,
-      req.params.id,
-      function(err, row) {
-        if (err) console.error(err);
-        db.serialize(() => {
-          db.get(
-            `Select * FROM quotes
-            WHERE id = ?`,
-            req.params.id,
-            function(err, row) {
-              if (err) console.error(err);
-              res.send(row);
-            }
-          );
-        });
-      }
-    );
-  });
-});
-
-app.post('/:id', function(req, res) {
-  if (!req.params.id) console.error('quote ID is required');
-  db.serialize(() => {
-    db.run(
-      `DELETE FROM quotes
-      WHERE id = ?`,
-      req.params.id,
-      function(err, row) {
-        if (err) console.error(err);
-        res.send('');
-      }
-    );
-  });
-});
-```
-
-```js
-new Todos('id', req.params.id)
-  .fetch({ require: true })
-  .then(todo => {
-    todo.destroy().then(() => res.json({ error: false, data: { message: 'Quote deleted' } }));
-  });
-```
