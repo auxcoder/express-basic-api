@@ -59,7 +59,7 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
     await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
       newUser.email,
-      buildTemplateModel({ username: newUser.username, email: newUser.email, verify_token: newToken.token } , req.body.client)
+      buildTemplateModel({ username: newUser.username, email: newUser.email, verify_token: verifiedToken } , req.body.client)
     );
 
     return res.status(201).json({errors: false, data: {id: verifiedToken}});
@@ -70,7 +70,7 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
 });
 
 // LOGIN
-router.post('/login', (req: express.Request, res: express.Response, next) => {
+router.post('/login', passport.authenticate('local', { session: false }), async (req, res,) => {
   const credentials = req.body;
   if(!credentials.email) return res.status(422).json({errors: {email: 'is required'}});
   if(!credentials.password) return res.status(422).json({errors: {password: 'is required'}});
