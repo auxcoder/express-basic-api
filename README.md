@@ -15,26 +15,6 @@ npm install
 npm start
 ```
 
-## [Knex Migrations](https://knexjs.org/#Migrations)
-
-### Create a new migration
-
-```sh
-knex migrate:make migration_name
-```
-
-### Run latest migration
-
-```sh
-knex migrate:latest
-```
-
-### To rollback the last batch of migrations
-
-```sh
-knex migrate:rollback
-```
-
 ---
 
 ## Running tests
@@ -84,18 +64,20 @@ TODO:
 
 ### Refs
 
+- [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)
 - [Building A Node Js Rest Api With Express - Part 1](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-46b0901f29b6)
 - [Building A Node Js Rest Api With Express - Part 2](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-part-two-9152661bf47)
 - [Express API ES6 Starter](https://codesandbox.io/s/lsn9y)
 - [Building a Node.js REST API with Express](https://medium.com/@jeffandersen/building-a-node-js-rest-api-with-express-46b0901f29b6)
 
-#### Docs
+### Libs & Modules
 
-- [KnexJS](https://knexjs.org/)
 - [SQLite](http://www.sqlitetutorial.net/)
-- [WinstonJS](https://github.com/winstonjs/winston)
 - [express-validator](https://github.com/express-validator/express-validator)
 - [Validator](https://github.com/chriso/validator.js)
+- [strong-error-handler](https://github.com/loopbackio/strong-error-handler)
+- [http-errors](https://github.com/jshttp/http-errors)
+- [WinstonJS](https://github.com/winstonjs/winston)
 
 ---
 
@@ -140,6 +122,8 @@ TODO:
 ---
 
 ### HTTP status codes
+
+[http-errors](https://github.com/jshttp/http-errors#readme)
 
 - **200**  OK, The request was successful
 - **201**  CREATED, A new resource object was successfully created
