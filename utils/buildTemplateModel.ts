@@ -1,7 +1,7 @@
 import constants from '../config/constants';
 
 type UserData = {
-  username: string; email: string; verify_token: string;
+  username: string; email: string; verifyToken: string;
 }
 type ClientData = {
   host: string; action_url: string; login_url: string
@@ -13,7 +13,7 @@ export default function buildTemplateModel(user: UserData, client: ClientData) {
     name: user.username,
     username: user.email,
     product_url: client.host,
-    action_url: `${client.host}${client.action_url}/${user.verify_token}`,
+    action_url: `${client.host}${client.action_url}/${user.verifyToken}`,
     login_url: `${client.host}${client.login_url}`,
     support_email: constants.emailData.supportEmail,
     sender_name: 'Support Team',
