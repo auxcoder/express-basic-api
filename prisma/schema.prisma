@@ -13,34 +13,36 @@ datasource db {
 model Todo {
   id        Int      @id @default(autoincrement())
   title     String   @unique
-  user_id   Int?
   completed Boolean
   iat       DateTime @default(now())
   uat       DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String
-  password     String
-  salt         String
-  itr          Int
-  email        String   @unique
-  verified     Boolean  @default(false)
-  active       Boolean
-  role         Int
-  token        Token[]
-  verify_token String
-  iat          DateTime @default(now())
-  uat          DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  username    String
+  password    String
+  salt        String
+  itr         Int
+  email       String   @unique
+  verified    Boolean  @default(false)
+  active      Boolean
+  role        Int
+  token       Token[]
+  todo        Todo[]
+  verifyToken String
+  iat         DateTime @default(now())
+  uat         DateTime @updatedAt
 }
 
 model Token {
-  id      Int      @id @default(autoincrement())
-  token   String   @unique
-  owner   User     @relation(fields: [user_id], references: [id])
-  user_id Int
-  active  Boolean
-  iat     DateTime @default(now())
-  uat     DateTime @updatedAt
+  id     Int      @id @default(autoincrement())
+  token  String   @unique
+  owner  User     @relation(fields: [userId], references: [id])
+  userId Int
+  active Boolean
+  iat    DateTime @default(now())
+  uat    DateTime @updatedAt
 }

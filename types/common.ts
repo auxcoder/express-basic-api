@@ -10,3 +10,17 @@ export type Profile = {
   iat?: string | null;
   uat?: string | null;
 }
+
+export type TemplateModel = {
+  product_name: string;
+  name: string;
+  username: string;
+  product_url: string;
+  action_path: string;
+  login_path: string;
+  support_email: string;
+  sender_name: string;
+  help_url: string;
+  company_name: string;
+  company_address: string;
+}

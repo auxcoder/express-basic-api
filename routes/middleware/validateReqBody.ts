@@ -1,7 +1,7 @@
-import {Request} from 'express';
+import express, {NextFunction} from 'express';
 import createError from "http-errors";
 
-export default function validateReqBody(req: Request, res: any, next: any) : void {
+export default function validateReqBody(req: express.Request, res: express.Response, next: NextFunction) : void {
   function requireBodyAttr(method: string) {
     return ['PATCH', 'PUT', 'POST'].indexOf(method) !== -1;
   }
@@ -10,4 +10,4 @@ export default function validateReqBody(req: Request, res: any, next: any) : voi
     next(createError(400, `Invalid request, method ${req.method} requires attributes in body`));
   }
   next();
-};
+}

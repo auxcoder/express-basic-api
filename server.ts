@@ -4,14 +4,13 @@ import miscRoutes from './routes/misc';
 import validateReqBody from './routes/middleware/validateReqBody';
 import catchRoute from './routes/middleware/catchRoute';
 import passport from './core/passport';
+import errorHandler from 'strong-error-handler';
 import dotenv from 'dotenv';
-if (process.env.NODE_ENV !== 'production') dotenv.config();
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') dotenv.config();
 // import logger from './core/logger';
-
-var app = express();
-
-var port = process.env.PORT || 5000;
-
+const app = express();
+// fixme: process.env.NODE_ENV && process.env.PORT are undefined
+const port = 3000;
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 // parse application/json
@@ -25,7 +24,11 @@ app.use('/', miscRoutes);
 app.use('/api', apiRoutes);
 // catch 404 and forward to error handler
 app.use(catchRoute);
-// error handler
+// error handle. https://github.com/loopbackio/strong-error-handler
+app.use(errorHandler({
+  debug: app.get('env') === 'development',
+  log: true,
+}));
 // app.use(function(err: any, req: express.Request, res: express.Request, next: express.Send) {
 //   // set locals, only providing error in development
 //   res.locals.message = err.message;
