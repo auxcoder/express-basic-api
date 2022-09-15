@@ -18,10 +18,11 @@ const router = express.Router();
 declare global { namespace Express { interface User { id: number, email: string } } }
 
 // READ exist
-router.get('/exist/:email', existUser(), validate, (req: express.Request, res: express.Response) => {
+router.get('/exist/:email', existUser(), validate, async (req: express.Request, res: express.Response) => {
+  const {email} = req.params;
   try {
-    const user = prisma.user.findFirst({where: {email: req.body.email, verified: true}})
-    return  res.json({ errors: false, data: user ?? null});
+    const user = await prisma.user.findFirstOrThrow({where: {email: email, verified: true}})
+    return  res.json({ errors: false, data: {email: user.email}});
   } catch (error) {
     if (error instanceof Error) return res.json({errors: [error.message], data: {}});
     return res.json(error)

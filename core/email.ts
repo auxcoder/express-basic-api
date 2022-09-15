@@ -38,7 +38,6 @@ const emailRepository = {
 
     try {
       if (ENV === 'development') {
-        console.log('log > templateModel >', templateModel);
         const account = await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
@@ -62,6 +61,7 @@ const emailRepository = {
         console.log("Email sent: %s", info.messageId);
         // Preview only available when sending through an Ethereal account
         console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        console.log("Verify Token: %s", templateModel.action_path);
 
         return info;
       } else {
