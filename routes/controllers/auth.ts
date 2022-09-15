@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import passport from 'passport';
 import { registerUser, existUser } from '../middleware/validateUser';
 import { hasAuthToken, verifyEmail } from '../middleware/hasAuthToken';
@@ -18,19 +18,18 @@ const router = express.Router();
 declare global { namespace Express { interface User { id: number, email: string } } }
 
 // READ exist
-router.get('/exist/:email', existUser(), validate, async (req: express.Request, res: express.Response) => {
+router.get('/exist/:email', existUser(), validate, async (req: Request, res: Response, next: NextFunction) => {
   const {email} = req.params;
   try {
     const user = await prisma.user.findFirstOrThrow({where: {email: email, verified: true}})
     return  res.json({ errors: false, data: {email: user.email}});
   } catch (error) {
-    if (error instanceof Error) return res.json({errors: [error.message], data: {}});
-    return res.json(error)
+    next(error)
   }
 });
 
 // REGISTER
-router.post('/register', registerUser(), validate, async (req: express.Request, res: express.Response) => {
+router.post('/register', registerUser(), validate, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {email, username, password, client} = req.body
     const user = await prisma.user.findUnique({where: {email: email}})
@@ -69,18 +68,17 @@ router.post('/register', registerUser(), validate, async (req: express.Request, 
       }
     });
   } catch (error) {
-    if (error instanceof Error) return res.json({errors: [error.message], data: {}});
-    return res.json(error)
+    next(error)
   }
 });
 
 // LOGIN
-router.post('/login', passport.authenticate('local', { session: false }), async (req, res,) => {
   const credentials = req.body;
   if(!credentials.email) return res.status(422).json({errors: {email: 'is required'}});
   if(!credentials.password) return res.status(422).json({errors: {password: 'is required'}});
   if(!req.user) return res.status(422).json({errors: {password: 'is required'}});
 
+router.post('/login', passport.authenticate('local', {session: false}), async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Passport store user info in req.user
     if (!req.user) throw new HttpErrors.NotFound('Record not found')
@@ -94,13 +92,12 @@ router.post('/login', passport.authenticate('local', { session: false }), async 
     // the jwt token contain a user profile object
     return res.json({errors: false, data: {token: newJWTToken.token}});
   } catch (error) {
-    if (error instanceof Error) return res.json({errors: [error.message], data: {}});
-    return res.json(error)
+    next(error)
   }
 });
 
 // LOGOUT
-router.get('/logout', hasAuthToken(), validate, async (req: express.Request, res: express.Response) => {
+router.get('/logout', hasAuthToken(), validate, async (req: Request, res: Response, next: NextFunction) => {
   const {authorization = ''}= req.headers;
   if (!authorization) throw new HttpErrors.Unauthorized('Invalid config')
 
@@ -112,13 +109,12 @@ router.get('/logout', hasAuthToken(), validate, async (req: express.Request, res
     return res.json({errors: false, data: {}});
 
   } catch (error) {
-    if (error instanceof Error) return res.json({errors: [error.message], data: {}});
-    return res.json(error)
+    next(error)
   }
 });
 
 // VERIFY
-router.post('/verify', verifyEmail(), validate, async (req: express.Request, res: express.Response) => {
+router.post('/verify', verifyEmail(), validate, async (req: Request, res: Response, next: NextFunction) => {
   const {token} = req.body;
   try {
     const userRecord = await prisma.user.findFirst({where: {verifyToken: token}})
@@ -136,9 +132,8 @@ router.post('/verify', verifyEmail(), validate, async (req: express.Request, res
 
     return res.json({errors: false, data: {id: user.id}, message: 'Thanks, for register, your account is verified'});
   } catch (error) {
-    if (error instanceof Error) return res.json({errors: [error.message], data: {}});
-    return res.json(error)
+    next(error)
   }
 });
-// module
+
 export default router;
