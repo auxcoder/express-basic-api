@@ -6,9 +6,8 @@ const client = new postmark.ServerClient(constants.emailData.postmarkId);
 const ENV = process.env.NODE_ENV || 'development';
 
 async function mock() {
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(
-      () =>
+  const promise = new Promise((resolve) => {
+    setTimeout(() =>
         resolve({
           To: null, // <email@domain>
           SubmittedAt: null, // <timestamps>

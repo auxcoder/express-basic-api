@@ -11,7 +11,6 @@ const router = express.Router();
 // READ all
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // todo: check roles
     const data = await prisma.user.findMany({where: {verified: true}});
     return res.json({data: data});
   } catch (error) {
