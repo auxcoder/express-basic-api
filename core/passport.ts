@@ -1,10 +1,12 @@
 import passport from 'passport';
 import localPkg from 'passport-local';
-import jwtPkg from 'passport-jwt';
+import * as jwtPkg from 'passport-jwt';
 import prisma from '../db/prisma'
 import {compareHash} from '../utils/jwtSign';
 const {Strategy: LocalStrategy} = localPkg;
 const {Strategy: JWTStrategy, ExtractJwt} = jwtPkg;
+const {JWT_SECRET} = process.env;
+const SECRET = JWT_SECRET || 'Secret!';
 
 passport.use(
   new LocalStrategy(
@@ -35,20 +37,23 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'secret',
+      secretOrKey: SECRET,
     },
     async function(jwtPayload, done) {
-      const user = await prisma.user.findUnique( {
-        where: {email: jwtPayload.email},
-        select: {verified: true, username: true, email: true, role: true }
-      });
+      if (!jwtPayload) return done(null, false, {message: 'JWTStrategy fails with not payload.'});
 
-      if (user === null) return done(null, false, {message: 'LocalStrategy user not found.'});
+      try {
+        const user = await prisma.user.findFirstOrThrow( {
+          where: {email: jwtPayload.email},
+          select: {verified: true, username: true, email: true, role: true }
+        });
+        if (!user) return done(null, false, {message: 'JWTStrategy, user not found.'});
+        if (user.email === jwtPayload.email && jwtPayload.sub === 'auth') return done(null, user);
 
-      if (user.email === jwtPayload.email && jwtPayload.sub === 'auth') {
-        done(null, user);
-      } else {
-        done(null, false, {message: 'Wrong claims'});
+        return done(null, user);
+      } catch (error) {
+        if (error instanceof Error) return done({message: error.message}, false);
+        return done({message: 'Wrong claims'}, false);
       }
     }
   )
