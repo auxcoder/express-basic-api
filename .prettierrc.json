@@ -8,15 +8,30 @@
   "bracketSpacing": true,
   "overrides": [
     {
-      "files": ["*.json", ".*"],
+      "files": [
+        "*.json",
+        ".*"
+      ],
       "options": {
-        "useTabs": false
+        "useTabs": false,
+        "singleQuote": false
       }
     },
     {
-      "files": ["*.html"],
+      "files": [
+        "*.html"
+      ],
       "options": {
-        "printWidth": 120
+        "printWidth": 120,
+        "singleQuote": false
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "printWidth": 120,
+        "useTabs": false,
+        "endOfLine": "crlf"
       }
     }
   ]
