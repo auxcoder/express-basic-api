@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import type {TLooseObj} from '../types/common';
-let env = process.env.NODE_ENV || 'development';
+const ENV = process.env.NODE_ENV || 'development';
 if (process.env.NODE_ENV !== 'production') dotenv.config();
 
 const emailData = {
@@ -60,4 +60,4 @@ const constants = {
 
 export default (function(obj: TLooseObj, e: string): EnvConfig {
   return obj[e];
-})(constants, env)
+})(constants, ENV)
