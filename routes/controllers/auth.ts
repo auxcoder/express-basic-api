@@ -4,19 +4,18 @@ import passport from 'passport';
 import { newUser, existUser } from '../middleware/validateUser';
 import { hasAuthToken, verifyEmail } from '../middleware/hasAuthToken';
 import validate from '../middleware/validate';
-import {jwtSign, jwtVerify} from '../../utils/jwtSign';
-import hashPassword from '../../utils/hashPass';
+import {jwtSign, jwtVerify, hashValueAsync} from '../../utils/jwtSign';
 import buildTemplateModel from '../../utils/buildTemplateModel';
 import emailRepository from '../../core/email';
 import constants from '../../config/constants';
 import prisma from '../../db/prisma'
 import HttpErrors from 'http-errors'
-import {Prisma} from "@prisma/client";
 if (process.env.NODE_ENV !== 'production') dotenv.config();
+const SECRET = process.env.JWT_SECRET || 'Secret!';
 // import {profile} from 'winston';
 const router = express.Router();
 // eslint-disable-next-line @typescript-eslint/no-namespace
-declare global { namespace Express { interface User { id: number } } }
+declare global { namespace Express { interface User { id: number, email: string } } }
 
 // READ exist
 router.get('/exist/:email', existUser(), validate, (req: express.Request, res: express.Response) => {
@@ -32,14 +31,14 @@ router.get('/exist/:email', existUser(), validate, (req: express.Request, res: e
 // REGISTER
 router.post('/register', newUser(), validate, async (req: express.Request, res: express.Response) => {
   try {
-    const {email, username, password} = req.body
+    const {email, username, password, client} = req.body
     const user = await prisma.user.findUnique({where: {email: email}})
     if (user) throw new HttpErrors.Forbidden('User taken')
 
-    const hashData = await hashPassword(password, constants.saltRounds);
+    const hashData = await hashValueAsync(password, constants.saltRounds);
     const verifiedToken = jwtSign(
-      Object.assign(req.body, {role: 1, email_verified: false}),
-      process.env.SECRET || 'secret',
+      Object.assign(req.body, {role: 1, verified: false}),
+      process.env.JWT_SECRET || 'Secret!',
       constants.ttlVerify
     )
     const newUser = await prisma.user.create({
@@ -52,17 +51,26 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
         verified: false,
         active: true,
         role: 1, // guess by default
-        verify_token: verifiedToken
+        verifyToken: verifiedToken
       }
     })
 
     await emailRepository.sendWelcome(
       'noreplay@auxcoder.com',
       newUser.email,
-      buildTemplateModel({ username: newUser.username, email: newUser.email, verify_token: verifiedToken } , req.body.client)
+      buildTemplateModel(
+        {username: newUser.username, email: newUser.email, verifyToken: verifiedToken},
+        {host: 'http://localhost:3000', action_path: '/api/auth/verify', login_path: '/api/auth/login'}
+      )
     );
 
-    return res.status(201).json({errors: false, data: {id: verifiedToken}});
+    return res.status(201).json({
+      errors: false,
+      data: {
+        message: 'Check your email inbox to verify account',
+        id: newUser.id
+      }
+    });
   } catch (error) {
     if (error instanceof Error) return res.json({errors: [error.message], data: {}});
     return res.json(error)
@@ -74,17 +82,16 @@ router.post('/login', passport.authenticate('local', { session: false }), async 
   const credentials = req.body;
   if(!credentials.email) return res.status(422).json({errors: {email: 'is required'}});
   if(!credentials.password) return res.status(422).json({errors: {password: 'is required'}});
+  if(!req.user) return res.status(422).json({errors: {password: 'is required'}});
 
   try {
     // Passport store user info in req.user
-    const user: Express.User | Prisma.UserMinAggregateOutputType | undefined  = req.user;
-    if (!user) throw new HttpErrors.NotFound('Record not found')
-    // if (!user?.id) throw new HttpErrors.NotFound('Record not found')
-    // if (!Object.hasOwn(user, 'id')) throw new HttpErrors.NotFound('Record not found')
+    if (!req.user) throw new HttpErrors.NotFound('Record not found')
+    if (!req.user?.id) throw new HttpErrors.NotFound('Record not found')
 
     // generate a new JWT
-    const token = jwtSign(user, 'auth', constants.ttlAuth);
-    const newJWTToken = await prisma.token.create({data: {token: token, user_id: user.id, active: true}})
+    const token = jwtSign({email: req.user.email, sub: req.user.id}, SECRET, constants.ttlAuth);
+    const newJWTToken = await prisma.token.create({data: {token: token, userId: req.user.id, active: true}})
     if (!newJWTToken) throw new HttpErrors.NotFound('Unable to create a token')
 
     // the jwt token contain a user profile object
@@ -130,7 +137,7 @@ router.post('/verify', verifyEmail(), validate, async (req: express.Request, res
     if (typeof verified !== 'string' && !verified.email) throw new HttpErrors.Unauthorized('Invalid token')
 
     // mark user as verified
-    const user = await prisma.user.update({where: {id: tokenRecord.user_id}, data: {verified: true}});
+    const user = await prisma.user.update({where: {id: tokenRecord.userId}, data: {verified: true}});
 
     // deactivate verification token
     await prisma.token.update({where: {token: token}, data: {active: false}})
