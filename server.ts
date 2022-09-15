@@ -5,13 +5,11 @@ import validateReqBody from './routes/middleware/validateReqBody';
 import catchRoute from './routes/middleware/catchRoute';
 import passport from './core/passport';
 import dotenv from 'dotenv';
-if (process.env.NODE_ENV !== 'production') dotenv.config();
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') dotenv.config();
 // import logger from './core/logger';
-
-var app = express();
-
-var port = process.env.PORT || 5000;
-
+const app = express();
+// fixme: process.env.NODE_ENV && process.env.PORT are undefined
+const port = 3000;
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 // parse application/json
