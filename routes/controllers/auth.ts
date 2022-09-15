@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import passport from 'passport';
-import { newUser, existUser } from '../middleware/validateUser';
+import { registerUser, existUser } from '../middleware/validateUser';
 import { hasAuthToken, verifyEmail } from '../middleware/hasAuthToken';
 import validate from '../middleware/validate';
 import {jwtSign, jwtVerify, hashValueAsync} from '../../utils/jwtSign';
@@ -30,7 +30,7 @@ router.get('/exist/:email', existUser(), validate, async (req: express.Request, 
 });
 
 // REGISTER
-router.post('/register', newUser(), validate, async (req: express.Request, res: express.Response) => {
+router.post('/register', registerUser(), validate, async (req: express.Request, res: express.Response) => {
   try {
     const {email, username, password, client} = req.body
     const user = await prisma.user.findUnique({where: {email: email}})
