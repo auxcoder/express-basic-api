@@ -1,7 +1,7 @@
 import express, {Request, Response, NextFunction} from 'express';
 import constants from '../../config/constants';
 import {getUser, newUser, patchUser} from '../middleware/validateUser';
-import {hashValueAsync, jwtSign} from '../../utils/jwtSign';
+import {hashValueAsync, jwtSign} from '../../utils/crypto';
 import validate from '../middleware/validate';
 import prisma from '../../db/prisma';
 import HttpErrors from 'http-errors'

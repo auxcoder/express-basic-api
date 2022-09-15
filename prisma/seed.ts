@@ -1,6 +1,6 @@
 import {PrismaClient} from '@prisma/client'
 import {faker} from '@faker-js/faker';
-import {jwtSign, hashValueWithSalt, generateSalt} from '../utils/jwtSign';
+import {jwtSign, hashValueWithSalt, generateSalt} from '../utils/crypto';
 const {JWT_ROUNDS, JWT_SECRET, JWT_API_TTL} = process.env;
 const SECRET = JWT_SECRET || 'Secret!';
 const prisma = new PrismaClient()
