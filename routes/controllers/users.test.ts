@@ -3,6 +3,7 @@ const assert = require('assert');
 import {jwtSign} from '../../utils/jwtSign';
 const request = require('supertest').agent(app.listen());
 var chance = require('chance').Chance();
+
 const newUser = {
   username: `test${chance.word({ length: 4 })}`,
   email: chance.email(),
@@ -19,13 +20,11 @@ const testUser = {
 let modelId;
 const token = jwtSign(
   {
-    username: testUser.username,
     email: testUser.email,
-    role: 1,
-    verified: testUser.verified,
+    sub: 1,
   },
   'auth',
-  String(60 * 60)
+  (60 * 60)
 );
 
 // READ all/paginate
@@ -46,6 +45,7 @@ describe('GET /users', () => {
       });
   });
 });
+
 // CREATE
 describe('POST /users', () => {
   it('should create a new User', done => {
@@ -64,6 +64,7 @@ describe('POST /users', () => {
       });
   });
 });
+
 // READ
 describe('GET /users/<id>', () => {
   it('should get a User by id', done => {
@@ -81,6 +82,7 @@ describe('GET /users/<id>', () => {
       });
   });
 });
+
 // UPDATE
 describe('PATCH /users/<id>', () => {
   it('should update a user record', done => {
@@ -98,6 +100,7 @@ describe('PATCH /users/<id>', () => {
       });
   });
 });
+
 // DELETE
 describe('DELETE /users/<id>', () => {
   it('should remove a user record', done => {
