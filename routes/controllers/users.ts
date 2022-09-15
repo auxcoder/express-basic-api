@@ -1,8 +1,7 @@
 import express from 'express';
 import constants from '../../config/constants';
 import {newUser, patchUser} from '../middleware/validateUser';
-import {jwtSign} from '../../utils/jwtSign';
-import hashPassword from '../../utils/hashPass';
+import {hashValueAsync, jwtSign} from '../../utils/jwtSign';
 import validate from '../middleware/validate';
 import prisma from '../../db/prisma';
 import HttpErrors from 'http-errors'
@@ -24,7 +23,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
 router.post('/', newUser(), validate, async (req: express.Request, res: express.Response) => {
     try {
       const {email, username, password} = req.body
-      const hashData = await hashPassword(password, constants.saltRounds);
+      const hashData = await hashValueAsync(password, constants.saltRounds);
 
       const token = jwtSign(
         Object.assign(req.body, {role: 1, email_verified: false}),
@@ -42,7 +41,7 @@ router.post('/', newUser(), validate, async (req: express.Request, res: express.
           verified: false,
           active: true,
           role: 1, // guess by default
-          verify_token: token
+          verifyToken: token
         }
       })
 

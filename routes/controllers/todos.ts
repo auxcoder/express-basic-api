@@ -1,4 +1,3 @@
-
 import express from 'express';
 import {getTodos, getTodo, createTodo, patchTodo, deleteTodo}  from '../middleware/validateTodo';
 import validate from '../middleware/validate';
@@ -8,10 +7,10 @@ const router = express.Router();
 
 // READ
 router.get('/', getTodos(), validate, async (req: express.Request, res: express.Response) => {
-  if (!req.body.user_id) console.error('quote ID is required');
+  if (!req.body.userId) console.error('quote ID is required');
 
   try {
-    const data = await prisma.todo.findMany({where: {user_id: req.body.user_id}});
+    const data = await prisma.todo.findMany({where: {userId: req.body.userId}});
     return res.json({errors: false, data: data});
   } catch (error) {
     if (error instanceof Error) return res.json({errors: [error.message], data: {}});
@@ -22,12 +21,12 @@ router.get('/', getTodos(), validate, async (req: express.Request, res: express.
 // CREATE
 router.post('/', createTodo(), validate, async (req: express.Request, res: express.Response) => {
   try {
-    const { title, completed, user_id } = req.body
+    const { title, completed, userId } = req.body
     const result = await prisma.todo.create({
       data: {
         title: title,
         completed: completed,
-        user_id: user_id,
+        userId: userId,
       },
     });
     return res.status(201).json({errors: false, data: result});
@@ -57,7 +56,7 @@ router.get('/:id([0-9]+)', getTodo(), validate, async (req: express.Request, res
 // UPDATE
 router.patch('/:id([0-9]+)', patchTodo(), validate, async (req: express.Request, res: express.Response) => {
   if (!req.params.id) console.error('todo ID is required');
-  const { title, completed, user_id } = req.body
+  const { title, completed, userId } = req.body
 
   try {
     const data = await prisma.todo.findUnique({where: {id: Number(req.params.id)}});
@@ -71,7 +70,7 @@ router.patch('/:id([0-9]+)', patchTodo(), validate, async (req: express.Request,
       data: {
         title,
         completed,
-        user_id
+        userId
       }
     });
 

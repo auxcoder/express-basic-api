@@ -36,11 +36,7 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
     if (user) throw new HttpErrors.Forbidden('User taken')
 
     const hashData = await hashValueAsync(password, constants.saltRounds);
-    const verifiedToken = jwtSign(
-      Object.assign(req.body, {role: 1, verified: false}),
-      process.env.JWT_SECRET || 'Secret!',
-      constants.ttlVerify
-    )
+    const verifiedToken = jwtSign( {sub: 0, email: email}, SECRET, constants.ttlVerify)
     const newUser = await prisma.user.create({
       data : {
         username: username,
@@ -60,7 +56,7 @@ router.post('/register', newUser(), validate, async (req: express.Request, res: 
       newUser.email,
       buildTemplateModel(
         {username: newUser.username, email: newUser.email, verifyToken: verifiedToken},
-        {host: 'http://localhost:3000', action_path: '/api/auth/verify', login_path: '/api/auth/login'}
+        {host: client || 'http://localhost:3000', action_path: '/api/auth/verify', login_path: '/api/auth/login'}
       )
     );
 
@@ -124,25 +120,20 @@ router.get('/logout', hasAuthToken(), validate, async (req: express.Request, res
 router.post('/verify', verifyEmail(), validate, async (req: express.Request, res: express.Response) => {
   const {token} = req.body;
   try {
-    const tokenRecord = await prisma.token.findUnique({where: {token: token}})
+    const userRecord = await prisma.user.findFirst({where: {verifyToken: token}})
 
     // token must exist
-    if (!tokenRecord) throw new HttpErrors.NotFound('Invalid verification token')
-
+    if (!userRecord) throw new HttpErrors.NotFound('Invalid verification token')
     // token must be active
-    if (!tokenRecord.active) throw new HttpErrors.PreconditionRequired('Invalid verification status')
-
+    if (!userRecord.active) throw new HttpErrors.PreconditionRequired('Invalid verification status')
     // verify token integrity
-    const verified = await jwtVerify(token, 'secret')
+    const verified = await jwtVerify(token, SECRET)
     if (typeof verified !== 'string' && !verified.email) throw new HttpErrors.Unauthorized('Invalid token')
 
     // mark user as verified
-    const user = await prisma.user.update({where: {id: tokenRecord.userId}, data: {verified: true}});
+    const user = await prisma.user.update({where: {id: userRecord.id}, data: {verified: true}});
 
-    // deactivate verification token
-    await prisma.token.update({where: {token: token}, data: {active: false}})
-
-    return res.json({errors: false, data: {id: user.id}});
+    return res.json({errors: false, data: {id: user.id}, message: 'Thanks, for register, your account is verified'});
   } catch (error) {
     if (error instanceof Error) return res.json({errors: [error.message], data: {}});
     return res.json(error)
