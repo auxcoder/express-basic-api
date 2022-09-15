@@ -22,7 +22,7 @@ router.get('/exist/:email', existUser(), validate, async (req: Request, res: Res
   const {email} = req.params;
   try {
     const user = await prisma.user.findFirstOrThrow({where: {email: email, verified: true}})
-    return  res.json({ errors: false, data: {email: user.email}});
+    return  res.json({data: {email: user.email}});
   } catch (error) {
     next(error)
   }
@@ -30,8 +30,8 @@ router.get('/exist/:email', existUser(), validate, async (req: Request, res: Res
 
 // REGISTER
 router.post('/register', registerUser(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {email, username, password, client} = req.body
   try {
-    const {email, username, password, client} = req.body
     const user = await prisma.user.findUnique({where: {email: email}})
     if (user) throw new HttpErrors.Forbidden('User taken')
 
@@ -60,26 +60,19 @@ router.post('/register', registerUser(), validate, async (req: Request, res: Res
       )
     );
 
-    return res.status(201).json({
-      errors: false,
-      data: {
-        message: 'Check your email inbox to verify account',
-        id: newUser.id
-      }
-    });
+    return res.status(201).json({data: {id: newUser.id }, message: 'Check your email inbox to verify account' });
   } catch (error) {
     next(error)
   }
 });
 
 // LOGIN
-  const credentials = req.body;
-  if(!credentials.email) return res.status(422).json({errors: {email: 'is required'}});
-  if(!credentials.password) return res.status(422).json({errors: {password: 'is required'}});
-  if(!req.user) return res.status(422).json({errors: {password: 'is required'}});
-
 router.post('/login', passport.authenticate('local', {session: false}), async (req: Request, res: Response, next: NextFunction) => {
+  const {email, password} = req.body;
   try {
+    if(!email) throw new HttpErrors.UnprocessableEntity('Email is required')
+    if(!password) throw new HttpErrors.UnprocessableEntity('Password is required')
+
     // Passport store user info in req.user
     if (!req.user) throw new HttpErrors.NotFound('Record not found')
     if (!req.user?.id) throw new HttpErrors.NotFound('Record not found')
@@ -90,7 +83,7 @@ router.post('/login', passport.authenticate('local', {session: false}), async (r
     if (!newJWTToken) throw new HttpErrors.NotFound('Unable to create a token')
 
     // the jwt token contain a user profile object
-    return res.json({errors: false, data: {token: newJWTToken.token}});
+    return res.json({data: {token: newJWTToken.token}});
   } catch (error) {
     next(error)
   }
@@ -106,8 +99,7 @@ router.get('/logout', hasAuthToken(), validate, async (req: Request, res: Respon
     if (!token) throw new HttpErrors.Unauthorized('Invalid config')
 
     await prisma.token.update({where: {token: token}, data: {active: false}})
-    return res.json({errors: false, data: {}});
-
+    return res.json({data: {}, msg: 'Logout with success'});
   } catch (error) {
     next(error)
   }
@@ -130,7 +122,7 @@ router.post('/verify', verifyEmail(), validate, async (req: Request, res: Respon
     // mark user as verified
     const user = await prisma.user.update({where: {id: userRecord.id}, data: {verified: true}});
 
-    return res.json({errors: false, data: {id: user.id}, message: 'Thanks, for register, your account is verified'});
+    return res.json({data: {id: user.id}, message: 'Thanks, for register, your account is verified'});
   } catch (error) {
     next(error)
   }

@@ -6,12 +6,11 @@ import HttpErrors from 'http-errors'
 const router = express.Router();
 
 // READ
-  if (!req.body.userId) console.error('quote ID is required');
-
 router.get('/', getTodos(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {userId} = req.body
   try {
-    const data = await prisma.todo.findMany({where: {userId: req.body.userId}});
-    return res.json({errors: false, data: data});
+    const data = await prisma.todo.findMany({where: {userId: userId}});
+    return res.json({data: data});
   } catch (error) {
     next(error)
   }
@@ -19,8 +18,8 @@ router.get('/', getTodos(), validate, async (req: Request, res: Response, next: 
 
 // CREATE
 router.post('/', createTodo(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const { title, completed, userId } = req.body
   try {
-    const { title, completed, userId } = req.body
     const result = await prisma.todo.create({
       data: {
         title: title,
@@ -28,35 +27,33 @@ router.post('/', createTodo(), validate, async (req: Request, res: Response, nex
         userId: userId,
       },
     });
-    return res.status(201).json({errors: false, data: result});
+    return res.status(201).json({data: result});
   } catch (error) {
     next(error)
   }
 });
 
 // READ
-  if (!req.params.id) console.error('quote ID is required');
-
 router.get('/:id([0-9]+)', getTodo(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
   try {
-    const data = await prisma.todo.findMany({where: {id: Number(req.params.id)}});
+    const data = await prisma.todo.findMany({where: {id: Number(id)}});
 
     // no match by id
     if (!data) throw new HttpErrors.NotFound('Record not found')
 
-    return res.json({errors: false, data: data});
+    return res.json({data: data});
   } catch (error) {
     next(error)
   }
 });
 
 // UPDATE
-  if (!req.params.id) console.error('todo ID is required');
-  const { title, completed, userId } = req.body
-
 router.patch('/:id([0-9]+)', patchTodo(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
+  const {title, completed, userId} = req.body
   try {
-    const data = await prisma.todo.findUnique({where: {id: Number(req.params.id)}});
+    const data = await prisma.todo.findUnique({where: {id: Number(id)}});
 
     // no match by id
     if (!data) throw new HttpErrors.NotFound('Record not found')
@@ -71,23 +68,23 @@ router.patch('/:id([0-9]+)', patchTodo(), validate, async (req: Request, res: Re
       }
     });
 
-    return res.json({ errors: false, data: updated, message: 'Todo updated'});
+    return res.json({data: updated, message: 'Todo updated with success'});
   } catch (error) {
     next(error)
   }
 });
 
 // DELETE
-  if (!req.params.id) console.error('Todo ID is required');
 router.delete('/:id([0-9]+)', deleteTodo(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
   try {
-    const item = await prisma.todo.findUnique({where: {id: Number(req.params.id)}});
+    const item = await prisma.todo.findUnique({where: {id: Number(id)}});
 
     // no match by id
     if (!item) throw new HttpErrors.NotFound('Record not found')
 
-    const data = await prisma.todo.delete({where: {id: Number(req.params.id)}});
-    return res.json({errors: false, data: data, message: `Todo removed, id: ${req.params.id}`});
+    const data = await prisma.todo.delete({where: {id: Number(id)}});
+    return res.json({data: data, message: 'Todo removed with success'});
   } catch (error) {
     next(error)
   }

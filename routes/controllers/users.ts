@@ -13,7 +13,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     // todo: check roles
     const data = await prisma.user.findMany({where: {verified: true}});
-    return res.json({errors: false, data: data});
+    return res.json({data: data});
   } catch (error) {
     next(error)
   }
@@ -40,50 +40,46 @@ router.post('/', newUser(), validate, async (req: Request, res: Response, next: 
         }
       });
 
-      return res.status(201).json({ errors: false, data: {id: newUser.id}});
+      return res.status(201).json({ data: {id: newUser.id}});
     } catch (error) {
       next(error)
     }
 });
 
 // READ
-  if (!req.params.id) console.error('quote ID is required');
 router.get('/:id([0-9]+)', getUser(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
   try {
-    const data = await prisma.user.findUniqueOrThrow({where: {id: Number(req.params.id)}})
-    if (!data) {
-      res.status(404).json({errors: true, message: 'User not found'});
-    } else {
-      res.json({errors: false, data: data});
-    }
+    const data = await prisma.user.findUniqueOrThrow({where: {id: Number(id)}})
+    if (!data) throw new HttpErrors.NotFound('Record not found')
+
+    return res.json({data: data});
   } catch (error) {
     next(error)
   }
 })
 
 // UPDATE
-  if (!req.params.id) console.error('user ID is required');
 router.patch('/:id([0-9]+)', patchUser(), validate, async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
   const {username} = req.body
-
   try {
-    const user = await prisma.user.findUniqueOrThrow({where: {id: Number(req.params.id)}})
+    const user = await prisma.user.findUniqueOrThrow({where: {id: Number(id)}})
     if (!user) throw new HttpErrors.NotFound('Record not found')
 
     await prisma.user.update({where: {id: Number(user.id)}, data: {username}})
-    return res.json({errors: false, data: req.body, message: 'User updated'});
+    return res.json({data: req.body, message: 'User updated'});
   } catch (error) {
     next(error)
   }
 });
 
 // DELETE
-  if (!req.params.id) console.error('user ID is required');
-
-router.delete('/:id([0-9]+)', async (req: express.Request, res: express.Response, next: NextFunction) => {
+router.delete('/:id([0-9]+)', async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params;
   try {
-    await prisma.user.delete({ where: {id: Number(req.params.id)}});
-    return res.json({errors: false, data: {id: req.params.id}, message: 'User removed'});
+    await prisma.user.delete({ where: {id: Number(id)}});
+    return res.json({data: {id: id}, message: 'User removed'});
   } catch (error) {
     next(error)
   }
